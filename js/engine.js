@@ -25,7 +25,7 @@ export function newState() {
     onboarded: false,
     settings: { romaji: true, slow: false, autoplay: true, sound: true },
     profile: { coins: 0, streak: 0, bestStreak: 0, lastPlay: null, freezes: 1, freezeEarnedAt: 0, reviewDay: null, reviewCount: 0 },
-    companion: { name: 'たびまる', exp: 0, fed: 0 },
+    garden: { active: 'sakura', plants: { sakura: { exp: 0 } }, cared: 0 },
     levels: {},
     items: {},
   };
@@ -219,28 +219,29 @@ export function reviewLeftToday(state, content) {
   return Math.min(dueItems(state, content).length, Math.max(0, DAILY_REVIEW_CAP - done));
 }
 
-// ---------- 旅伴成長 ----------
+// ---------- 植物成長 ----------
 const LV_EXP = [0, 50, 120, 210, 320, 450, 600, 780, 1000];
-export function companionLevel(exp) {
+export function growthLevel(exp) {
   let lv = 1;
   LV_EXP.forEach((need, i) => { if (exp >= need) lv = i + 1; });
   const cur = LV_EXP[lv - 1] ?? LV_EXP[LV_EXP.length - 1];
   const next = LV_EXP[lv] ?? null;
   return { lv, cur, next, pct: next ? (exp - cur) / (next - cur) : 1 };
 }
-export function companionStage(lv) { return lv >= 5 ? 3 : lv >= 3 ? 2 : 1; }
+// Lv1-2 第 1 階段、Lv3-4 第 2、Lv5-6 第 3、Lv7 以上第 4
+export function growthStage(lv) { return lv >= 7 ? 4 : lv >= 5 ? 3 : lv >= 3 ? 2 : 1; }
+export const STAGE_LV = { 2: 3, 3: 5, 4: 7 };
 
-export const SNACKS = [
-  { id: 'dango', jp: 'だんご', ro: 'dango', zh: '糰子', price: 30, exp: 10 },
-  { id: 'onigiri', jp: 'おにぎり', ro: 'onigiri', zh: '飯糰', price: 50, exp: 18 },
-  { id: 'ramune', jp: 'ラムネ', ro: 'ramune', zh: '彈珠汽水', price: 80, exp: 30 },
+export const CARE = [
+  { id: 'mizu', jp: 'みず', ro: 'mizu', zh: '水', price: 20, exp: 8 },
+  { id: 'hiryou', jp: 'ひりょう', ro: 'hiryou', zh: '肥料', price: 50, exp: 20 },
+  { id: 'eiyouzai', jp: 'えいようざい', ro: 'eiyouzai', zh: '營養劑', price: 80, exp: 32 },
 ];
 
 export const LINES = [
   { jp: 'がんばろう！', ro: 'ganbarou!', zh: '一起加油吧！' },
-  { jp: 'いっしょに いこう！', ro: 'issho ni ikou!', zh: '一起去吧！' },
-  { jp: 'たのしいね！', ro: 'tanoshii ne!', zh: '好開心喔！' },
-  { jp: 'おなか すいた〜', ro: 'onaka suita~', zh: '肚子餓了～' },
+  { jp: 'きょうも いっしょに！', ro: 'kyou mo issho ni!', zh: '今天也一起努力！' },
+  { jp: 'たのしいね！', ro: 'tanoshii ne!', zh: '很好玩吧！' },
   { jp: 'もう すこし！', ro: 'mou sukoshi!', zh: '再一點點就好！' },
   { jp: 'ふくおか、たのしみ！', ro: 'fukuoka, tanoshimi!', zh: '好期待福岡！' },
 ];

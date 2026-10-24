@@ -1,6 +1,6 @@
 # 旅伴日語 Tabitomo
 
-零基礎、每天 5 分鐘的遊戲化日語學習 PWA。玩家和原創小蝦旅伴「たびまる」一起從五十音學起，一路「旅行」到能在日本開口。
+零基礎、每天 5 分鐘的遊戲化日語學習 PWA。從五十音學起，一路「旅行」到能在日本開口。學得越多，你種的植物（櫻花樹、龜背芋、鹿角蕨）就長得越大。
 
 ## 目前內容：序章 v0.1
 
@@ -22,7 +22,7 @@ js/app.js             畫面與互動
 js/engine.js          Leitner 5 盒 SRS、組題、旅伴成長、連續天數
 js/store.js           IndexedDB 存檔（失敗時退回 localStorage）
 js/audio.js           瀏覽器日文 TTS＋合成音效
-js/companion.js       たびまる SVG（三階段成長）
+js/plants.js          植物 SVG（櫻花樹、龜背芋、鹿角蕨，各 4 階段）
 data/prologue.json    序章題庫
 sw.js                 離線快取
 ```

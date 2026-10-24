@@ -1,16 +1,16 @@
 import { loadState, saveState, addLogs, allLogs, clearAll, requestPersist } from './store.js';
 import { speech, sfx } from './audio.js';
-import { companionSVG, STAGE_NAMES } from './companion.js';
+import { plantSVG, PLANTS, plantById } from './plants.js';
 import {
   today, newState, applyResult, itemStatus, progressCounts, buildLevel, buildReview, reviewLeftToday,
-  makeQuestion, companionLevel, companionStage, SNACKS, LINES, CHEERS, COMFORT, touchStreak, streakAlive,
+  makeQuestion, growthLevel, growthStage, STAGE_LV, CARE, LINES, CHEERS, COMFORT, touchStreak, streakAlive,
 } from './engine.js';
 
 const app = document.getElementById('app');
 let content = null;
 let state = null;
 let session = null;
-const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, mood: 'idle', toast: null };
+const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, sway: false, toast: null };
 
 // ---------- 工具 ----------
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -27,9 +27,15 @@ function toast(msg) {
   toast.t = setTimeout(() => { ui.toast = null; render(); }, 2200);
 }
 
-function companionInfo() {
-  const c = companionLevel(state.companion.exp);
-  return { ...c, stage: companionStage(c.lv) };
+// 目前在種的植物
+function plantInfo(id = state.garden.active) {
+  const exp = state.garden.plants[id]?.exp || 0;
+  const g = growthLevel(exp);
+  return { id, exp, ...g, stage: growthStage(g.lv), def: plantById(id) };
+}
+const learnedCount = () => Object.keys(state.items).length;
+function drawPlant(info = plantInfo()) {
+  return plantSVG(info.id, info.stage, { blooms: learnedCount() });
 }
 
 function line(l, cls = '') {
@@ -48,7 +54,11 @@ async function boot() {
   const base = newState();
   state.settings = { ...base.settings, ...state.settings };
   state.profile = { ...base.profile, ...state.profile };
-  state.companion = { ...base.companion, ...state.companion };
+  if (!state.garden) {
+    // 舊存檔：吉祥物的經驗轉給櫻花樹
+    state.garden = { ...base.garden, plants: { sakura: { exp: state.companion?.exp || 0 } } };
+    delete state.companion;
+  }
   sfx.enabled = state.settings.sound;
   if (!state.onboarded) ui.overlay = 'onboard';
   render();
@@ -64,7 +74,7 @@ function render() {
   else if (ui.overlay === 'result') html = viewResult();
   else {
     html = `<main class="page page-${ui.tab}">${
-      ui.tab === 'home' ? viewHome() : ui.tab === 'book' ? viewBook() : ui.tab === 'buddy' ? viewBuddy() : viewSettings()
+      ui.tab === 'home' ? viewHome() : ui.tab === 'book' ? viewBook() : ui.tab === 'garden' ? viewGarden() : viewSettings()
     }</main>${viewNav()}${ui.sheet ? viewSheet() : ''}`;
   }
   if (ui.toast) html += `<div class="toast" role="status">${esc(ui.toast)}</div>`;
@@ -72,7 +82,7 @@ function render() {
 }
 
 function viewNav() {
-  const tabs = [['home', '旅程'], ['book', '手帳'], ['buddy', '旅伴'], ['settings', '設定']];
+  const tabs = [['home', '旅程'], ['book', '手帳'], ['garden', '植物'], ['settings', '設定']];
   return `<nav class="tabbar">${tabs.map(([k, n]) =>
     `<button data-action="tab" data-tab="${k}" class="${ui.tab === k ? 'on' : ''}" aria-current="${ui.tab === k}"><i class="ic ic-${k}"></i>${n}</button>`
   ).join('')}</nav>`;
@@ -80,9 +90,9 @@ function viewNav() {
 
 function viewOnboard() {
   return `<section class="onboard">
-    <div class="buddy-hero bounce">${companionSVG(1, 'happy')}</div>
-    <div class="bubble big">${line({ jp: 'はじめまして！ぼくは たびまる。', ro: 'hajimemashite! boku wa tabimaru.', zh: '初次見面！我是旅丸。' })}</div>
-    <p class="lead">我會陪你從五十音開始，一路學到能在日本開口說話。每天 5 分鐘，我們先搭上飛往福岡的飛機。</p>
+    <div class="plant-hero">${plantSVG('sakura', 1, { blooms: 0 })}</div>
+    <div class="bubble big">${line({ jp: 'いっしょに そだてよう！', ro: 'issho ni sodateyou!', zh: '一起把它養大吧！' })}</div>
+    <p class="lead">這是你的櫻花樹。每學會一個字，它就長大一點、多開一朵花。每天 5 分鐘，我們先搭上飛往福岡的飛機。</p>
     <p class="hint-text">日文都會附上羅馬拼音，點 <i class="ic ic-sound inline"></i> 可以聽發音。</p>
     <button class="btn primary wide" data-action="onboard-go">出發</button>
   </section>`;
@@ -96,11 +106,11 @@ function stationState(i) {
 }
 
 function viewHome() {
-  const ci = companionInfo();
+  const pi = plantInfo();
   const streak = streakAlive(state);
   const nextIdx = content.levels.findIndex((_, i) => stationState(i) === 'open');
   const dueN = reviewLeftToday(state, content);
-  const bubble = ui.bubble || (streak ? { jp: 'きょうも いっしょに！', ro: 'kyou mo issho ni!', zh: '今天也一起加油！' } : LINES[1]);
+  const bubble = ui.bubble || (streak ? LINES[1] : LINES[0]);
 
   const stations = content.levels.map((lv, i) => {
     const st = stationState(i);
@@ -118,11 +128,11 @@ function viewHome() {
       <div class="streak ${streak ? 'on' : ''}"><i class="ic ic-fire"></i><b>${streak}</b> 天連續</div>
       <div class="coins"><i class="ic ic-coin"></i>${state.profile.coins}</div>
     </header>
-    <section class="home-buddy" data-action="buddy-talk">
+    <section class="home-plant" data-action="plant-tap">
       <div class="bubble">${line(bubble)}</div>
-      <div class="buddy-sm bounce">${companionSVG(ci.stage, ui.mood)}</div>
-      <div class="buddy-meta"><b>${esc(state.companion.name)}</b> Lv.${ci.lv}
-        <div class="bar"><i style="width:${Math.round(ci.pct * 100)}%"></i></div></div>
+      <div class="plant-md ${ui.sway ? 'sway' : ''}">${drawPlant(pi)}</div>
+      <div class="plant-meta"><b>${esc(pi.def.zh)}</b>・${esc(pi.def.stages[pi.stage - 1])}　Lv.${pi.lv}
+        <div class="bar"><i style="width:${Math.round(pi.pct * 100)}%"></i></div></div>
     </section>
     <section class="cta">
       ${nextIdx >= 0
@@ -183,26 +193,44 @@ function viewSheet() {
     </aside>`;
 }
 
-function viewBuddy() {
-  const ci = companionInfo();
-  const nextStage = ci.lv < 3 ? 'Lv.3 解鎖：旅行斗笠' : ci.lv < 5 ? 'Lv.5 解鎖：圍巾和小背包' : '已經整裝完畢，準備好出發了！';
+function viewGarden() {
+  const pi = plantInfo();
+  const nextLv = STAGE_LV[pi.stage + 1];
+  const nextNote = nextLv ? `Lv.${nextLv} 進入「${pi.def.stages[pi.stage]}」` : '已經長到最大了！';
+  const cards = PLANTS.map(p => {
+    const owned = !!state.garden.plants[p.id];
+    const info = owned ? plantInfo(p.id) : null;
+    const active = state.garden.active === p.id;
+    const btn = active ? '<span class="pill on">種植中</span>'
+      : owned ? `<button class="pill" data-action="plant-use" data-id="${p.id}">換這盆</button>`
+      : `<button class="pill buy" data-action="plant-buy" data-id="${p.id}" ${state.profile.coins < p.price ? 'disabled' : ''}><i class="ic ic-coin"></i>${p.price}</button>`;
+    return `<div class="plant-card ${active ? 'on' : ''} ${owned ? '' : 'locked'}">
+      <div class="plant-thumb">${plantSVG(p.id, owned ? info.stage : 4, { blooms: owned ? learnedCount() : 30 })}</div>
+      <b>${esc(p.zh)}</b><span class="jp small-jp">${esc(p.jp)}</span>${ro(p.ro)}
+      <small>${owned ? `Lv.${info.lv}・${esc(p.stages[info.stage - 1])}` : esc(p.note)}</small>
+      ${btn}</div>`;
+  }).join('');
   return `
-    <header class="top"><h1>旅伴</h1><div class="coins"><i class="ic ic-coin"></i>${state.profile.coins}</div></header>
-    <section class="buddy-big" data-action="buddy-talk">
+    <header class="top"><h1>植物</h1><div class="coins"><i class="ic ic-coin"></i>${state.profile.coins}</div></header>
+    <section class="plant-stage" data-action="plant-tap">
       ${ui.bubble ? `<div class="bubble">${line(ui.bubble)}</div>` : ''}
-      <div class="bounce">${companionSVG(ci.stage, ui.mood)}</div>
+      <div class="plant-lg ${ui.sway ? 'sway' : ''}">${drawPlant(pi)}</div>
     </section>
-    <section class="buddy-card">
-      <div class="row"><b class="name jp">${esc(state.companion.name)}</b><span>Lv.${ci.lv}・${STAGE_NAMES[ci.stage]}</span></div>
-      <div class="bar big"><i style="width:${Math.round(ci.pct * 100)}%"></i></div>
-      <p class="hint-text">${ci.next ? `經驗 ${state.companion.exp} / ${ci.next}` : `經驗 ${state.companion.exp}`}　${nextStage}</p>
+    <section class="plant-info">
+      <div class="row"><b class="name">${esc(pi.def.zh)}　<span class="jp">${esc(pi.def.jp)}</span></b><span>Lv.${pi.lv}・${esc(pi.def.stages[pi.stage - 1])}</span></div>
+      <div class="bar big"><i style="width:${Math.round(pi.pct * 100)}%"></i></div>
+      <p class="hint-text">${pi.next ? `成長值 ${pi.exp} / ${pi.next}` : `成長值 ${pi.exp}`}　${nextNote}</p>
+      ${pi.id === 'sakura' ? `<p class="hint-text">已經開了 ${Math.min(learnedCount(), 30)} 朵花，每一朵都是你學會的一個字。</p>` : ''}
     </section>
-    <h2>買點心給たびまる</h2>
-    <p class="hint-text">用學習賺到的旅費買點心，たびまる吃了會長大。</p>
-    <div class="snacks">${SNACKS.map(s => `
-      <button class="snack" data-action="feed" data-id="${s.id}" ${state.profile.coins < s.price ? 'disabled' : ''}>
-        <span class="jp">${esc(s.jp)}</span>${ro(s.ro)}<small>${esc(s.zh)}・經驗 +${s.exp}</small>
-        <b><i class="ic ic-coin"></i>${s.price}</b></button>`).join('')}</div>`;
+    <h2>照顧它</h2>
+    <p class="hint-text">用學習賺到的旅費照顧植物，成長值會增加。</p>
+    <div class="care">${CARE.map(c => `
+      <button class="care-btn" data-action="care" data-id="${c.id}" ${state.profile.coins < c.price ? 'disabled' : ''}>
+        <span class="jp">${esc(c.jp)}</span>${ro(c.ro)}<small>${esc(c.zh)}・成長 +${c.exp}</small>
+        <b><i class="ic ic-coin"></i>${c.price}</b></button>`).join('')}</div>
+    <h2>我的植物</h2>
+    <p class="hint-text">每盆植物各自成長，換盆不會讓原本那盆的進度消失。</p>
+    <div class="plant-cards">${cards}</div>`;
 }
 
 function viewSettings() {
@@ -305,9 +333,8 @@ function viewSession() {
 }
 
 function viewBanner(st) {
-  const ci = companionInfo();
   return `<div class="banner">
-    <div class="buddy-sm bounce">${companionSVG(ci.stage, 'happy')}</div>
+    <div class="plant-sm">${drawPlant()}</div>
     <h2>${esc(st.text)}</h2><p>${esc(st.sub)}</p>
   </div>
   <div class="foot"><button class="btn primary wide" data-action="next">開始</button></div>`;
@@ -357,10 +384,11 @@ function answerDetail(it) {
 }
 
 function feedback(ok, detail, retryNote = true) {
-  const ci = companionInfo();
   const l = ok ? pick(CHEERS) : COMFORT;
   return `<div class="feedback ${ok ? 'ok' : 'ng'}">
-    <div class="fb-head"><div class="buddy-xs">${companionSVG(ci.stage, ok ? 'happy' : 'think')}</div>
+    <div class="fb-head"><div class="mark" aria-hidden="true">${ok
+      ? '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="5"/></svg>'
+      : '<svg viewBox="0 0 40 40"><path d="M9 9 31 31M31 9 9 31" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'}</div>
       <div>${line(l)}${ok || !retryNote ? '' : '<p class="zh small">這題等一下會再出現一次。</p>'}</div></div>
     ${detail}
     <button class="btn primary wide" data-action="next">繼續</button>
@@ -488,7 +516,7 @@ function nextStep() {
 
 function finishSession() {
   const date = today();
-  const before = companionInfo();
+  const before = plantInfo();
   const firstToday = state.profile.lastPlay !== date;
   const newly = [];
   Object.entries(session.stats).forEach(([id, s]) => {
@@ -513,8 +541,8 @@ function finishSession() {
   if (firstToday) exp += 10;
   const { usedFreeze } = touchStreak(state, date);
   state.profile.coins += coins;
-  state.companion.exp += exp;
-  const after = companionInfo();
+  state.garden.plants[state.garden.active].exp += exp;
+  const after = plantInfo();
 
   session.result = { acc, coins, exp, newly, usedFreeze, firstToday, lvUp: after.lv > before.lv, stageUp: after.stage > before.stage, after };
   save();
@@ -534,13 +562,13 @@ function viewResult() {
   const newStamps = r.newly.map(byId).filter(Boolean);
   return `<section class="result">
     <h1>${isLevel ? `「${esc(session.level.title)}」完成！` : '今日複習完成！'}</h1>
-    <div class="buddy-hero bounce">${companionSVG(ci.stage, 'happy')}</div>
-    ${r.stageUp ? `<div class="levelup">${line({ jp: 'みて！あたらしい すがた！', ro: 'mite! atarashii sugata!', zh: '你看！我換新造型了！' })}<p>たびまる升到 Lv.${ci.lv}，解鎖「${STAGE_NAMES[ci.stage]}」</p></div>`
-      : r.lvUp ? `<div class="levelup"><p>たびまる升到 Lv.${ci.lv}！</p></div>` : ''}
+    <div class="plant-hero grow">${drawPlant(ci)}</div>
+    ${r.stageUp ? `<div class="levelup">${line({ jp: 'みて！おおきく なった！', ro: 'mite! ookiku natta!', zh: '你看！長大了！' })}<p>${esc(ci.def.zh)}升到 Lv.${ci.lv}，進入「${esc(ci.def.stages[ci.stage - 1])}」</p></div>`
+      : r.lvUp ? `<div class="levelup"><p>${esc(ci.def.zh)}升到 Lv.${ci.lv}！</p></div>` : ''}
     <div class="stats">
       <div><b>${r.acc}%</b><span>答對率</span></div>
       <div><b>+${r.coins}</b><span>旅費</span></div>
-      <div><b>+${r.exp}</b><span>旅伴經驗</span></div>
+      <div><b>+${r.exp}</b><span>成長值</span></div>
       <div><b>${state.profile.streak}</b><span>天連續</span></div>
     </div>
     ${r.usedFreeze ? '<p class="hint-text">昨天沒玩，自動用掉一張補票，連續天數保住了。</p>' : ''}
@@ -553,33 +581,60 @@ function viewResult() {
   </section>`;
 }
 
-// ---------- 旅伴互動 ----------
-function buddyTalk() {
-  const l = pick(LINES.filter(x => x !== ui.bubble));
-  ui.bubble = l;
-  ui.mood = 'happy';
-  render();
-  say(l.jp);
-  clearTimeout(buddyTalk.t);
-  buddyTalk.t = setTimeout(() => { ui.mood = 'idle'; render(); }, 1600);
+// ---------- 植物互動 ----------
+function swayOnce() {
+  ui.sway = true;
+  clearTimeout(swayOnce.t);
+  swayOnce.t = setTimeout(() => { ui.sway = false; render(); }, 900);
 }
 
-function feed(id) {
-  const s = SNACKS.find(x => x.id === id);
-  if (!s || state.profile.coins < s.price) return;
-  const before = companionInfo();
-  state.profile.coins -= s.price;
-  state.companion.exp += s.exp;
-  state.companion.fed += 1;
-  const after = companionInfo();
-  ui.bubble = { jp: `${s.jp}、おいしい！`, ro: `${s.ro}, oishii!`, zh: `${s.zh}好好吃！` };
-  ui.mood = 'happy';
+function plantTap() {
+  const l = pick(LINES.filter(x => x !== ui.bubble));
+  ui.bubble = l;
+  swayOnce();
+  render();
+  say(l.jp);
+}
+
+function care(id) {
+  const c = CARE.find(x => x.id === id);
+  if (!c || state.profile.coins < c.price) return;
+  const before = plantInfo();
+  state.profile.coins -= c.price;
+  state.garden.plants[before.id].exp += c.exp;
+  state.garden.cared = (state.garden.cared || 0) + 1;
+  const after = plantInfo();
+  ui.bubble = { jp: `${c.jp}、ありがとう！`, ro: `${c.ro}, arigatou!`, zh: `謝謝你的${c.zh}！` };
   save();
   sfx.correct();
   say(ui.bubble.jp);
-  if (after.stage > before.stage) toast(`たびまる長大了！解鎖「${STAGE_NAMES[after.stage]}」`);
-  else if (after.lv > before.lv) toast(`たびまる升到 Lv.${after.lv}！`);
+  swayOnce();
+  if (after.stage > before.stage) toast(`${after.def.zh}長大了！進入「${after.def.stages[after.stage - 1]}」`);
+  else if (after.lv > before.lv) toast(`${after.def.zh}升到 Lv.${after.lv}！`);
   else render();
+}
+
+function buyPlant(id) {
+  const p = plantById(id);
+  if (state.garden.plants[id] || state.profile.coins < p.price) return;
+  if (!confirm(`用 ${p.price} 旅費買一盆${p.zh}，並開始種它？`)) return;
+  state.profile.coins -= p.price;
+  state.garden.plants[id] = { exp: 0 };
+  state.garden.active = id;
+  ui.bubble = null;
+  save();
+  sfx.stamp();
+  say(p.jp);
+  toast(`新植物：${p.zh}（${p.jp}）`);
+}
+
+function usePlant(id) {
+  if (!state.garden.plants[id]) return;
+  state.garden.active = id;
+  ui.bubble = null;
+  save();
+  say(plantById(id).jp);
+  render();
 }
 
 // ---------- 備份 ----------
@@ -641,12 +696,14 @@ app.addEventListener('click', e => {
     case 'undo': curStep().filled?.pop(); render(); break;
     case 'sheet': ui.sheet = el.dataset.id; render(); if (state.items[ui.sheet] && state.settings.autoplay) say(byId(ui.sheet).jp); break;
     case 'close-sheet': ui.sheet = null; render(); break;
-    case 'buddy-talk': buddyTalk(); break;
-    case 'feed': feed(el.dataset.id); break;
+    case 'plant-tap': plantTap(); break;
+    case 'care': care(el.dataset.id); break;
+    case 'plant-buy': buyPlant(el.dataset.id); break;
+    case 'plant-use': usePlant(el.dataset.id); break;
     case 'test-voice': say('こんにちは。いっしょに がんばろう！'); break;
     case 'export': exportData(); break;
     case 'reset':
-      if (confirm('所有進度、旅費和たびまる的成長都會清除，無法復原。確定嗎？')) {
+      if (confirm('所有進度、旅費和植物的成長都會清除，無法復原。確定嗎？')) {
         clearAll().then(() => { state = newState(); session = null; ui.overlay = 'onboard'; ui.tab = 'home'; render(); });
       }
       break;
