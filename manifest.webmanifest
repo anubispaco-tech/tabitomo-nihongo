@@ -1,0 +1,17 @@
+{
+  "name": "旅伴日語 Tabitomo",
+  "short_name": "旅伴日語",
+  "description": "零基礎、每天 5 分鐘的遊戲化日語學習",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F2F4EE",
+  "theme_color": "#F2F4EE",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

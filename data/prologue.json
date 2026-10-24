@@ -1,0 +1,143 @@
+{
+  "chapter": "prologue",
+  "title": "序章　飛往福岡",
+  "note": "注音只是近似音，請以發音為準。字首的か、た行在日語中送氣較弱，在字中間時更接近ㄍ、ㄉ。",
+  "items": [
+    {"id": "k-a",  "type": "kana", "jp": "あ", "ro": "a",   "zy": "ㄚ",   "origin": "安", "ex": {"jp": "あさ", "ro": "asa", "zh": "早上"}},
+    {"id": "k-i",  "type": "kana", "jp": "い", "ro": "i",   "zy": "ㄧ",   "origin": "以", "ex": {"jp": "いえ", "ro": "ie", "zh": "房子、家"}},
+    {"id": "k-u",  "type": "kana", "jp": "う", "ro": "u",   "zy": "ㄨ",   "origin": "宇", "tip": "嘴唇放鬆、不要嘟起來。", "ex": {"jp": "うみ", "ro": "umi", "zh": "海"}},
+    {"id": "k-e",  "type": "kana", "jp": "え", "ro": "e",   "zy": "ㄝ",   "origin": "衣", "ex": {"jp": "えき", "ro": "eki", "zh": "車站"}},
+    {"id": "k-o",  "type": "kana", "jp": "お", "ro": "o",   "zy": "ㄛ",   "origin": "於", "ex": {"jp": "おかし", "ro": "okashi", "zh": "零食、點心"}},
+
+    {"id": "k-ka", "type": "kana", "jp": "か", "ro": "ka",  "zy": "ㄎㄚ", "origin": "加", "ex": {"jp": "かさ", "ro": "kasa", "zh": "雨傘"}},
+    {"id": "k-ki", "type": "kana", "jp": "き", "ro": "ki",  "zy": "ㄎㄧ", "origin": "幾", "ex": {"jp": "きた", "ro": "kita", "zh": "北方"}},
+    {"id": "k-ku", "type": "kana", "jp": "く", "ro": "ku",  "zy": "ㄎㄨ", "origin": "久", "ex": {"jp": "くち", "ro": "kuchi", "zh": "嘴巴"}},
+    {"id": "k-ke", "type": "kana", "jp": "け", "ro": "ke",  "zy": "ㄎㄝ", "origin": "計", "ex": {"jp": "けいたい", "ro": "keitai", "zh": "手機"}},
+    {"id": "k-ko", "type": "kana", "jp": "こ", "ro": "ko",  "zy": "ㄎㄛ", "origin": "己", "ex": {"jp": "こども", "ro": "kodomo", "zh": "小孩"}},
+
+    {"id": "k-sa", "type": "kana", "jp": "さ", "ro": "sa",  "zy": "ㄙㄚ", "origin": "左", "ex": {"jp": "さかな", "ro": "sakana", "zh": "魚"}},
+    {"id": "k-shi","type": "kana", "jp": "し", "ro": "shi", "zy": "ㄒㄧ", "origin": "之", "tip": "拼音寫 shi，實際比較接近「ㄒㄧ」。", "ex": {"jp": "しお", "ro": "shio", "zh": "鹽"}},
+    {"id": "k-su", "type": "kana", "jp": "す", "ro": "su",  "zy": "ㄙㄨ", "origin": "寸", "ex": {"jp": "すし", "ro": "sushi", "zh": "壽司"}},
+    {"id": "k-se", "type": "kana", "jp": "せ", "ro": "se",  "zy": "ㄙㄝ", "origin": "世", "ex": {"jp": "せき", "ro": "seki", "zh": "座位"}},
+    {"id": "k-so", "type": "kana", "jp": "そ", "ro": "so",  "zy": "ㄙㄛ", "origin": "曾", "ex": {"jp": "そら", "ro": "sora", "zh": "天空"}},
+
+    {"id": "k-ta", "type": "kana", "jp": "た", "ro": "ta",  "zy": "ㄊㄚ", "origin": "太", "ex": {"jp": "たまご", "ro": "tamago", "zh": "蛋"}},
+    {"id": "k-chi","type": "kana", "jp": "ち", "ro": "chi", "zy": "ㄑㄧ", "origin": "知", "tip": "拼音寫 chi，實際比較接近「ㄑㄧ」。", "ex": {"jp": "ちず", "ro": "chizu", "zh": "地圖"}},
+    {"id": "k-tsu","type": "kana", "jp": "つ", "ro": "tsu", "zy": "ㄘㄨ", "origin": "川", "tip": "接近「ㄘ」加上輕輕的「ㄨ」，舌尖先頂住上牙齦。", "ex": {"jp": "つくえ", "ro": "tsukue", "zh": "書桌"}},
+    {"id": "k-te", "type": "kana", "jp": "て", "ro": "te",  "zy": "ㄊㄝ", "origin": "天", "ex": {"jp": "て", "ro": "te", "zh": "手"}},
+    {"id": "k-to", "type": "kana", "jp": "と", "ro": "to",  "zy": "ㄊㄛ", "origin": "止", "ex": {"jp": "とけい", "ro": "tokei", "zh": "時鐘、手錶"}},
+
+    {"id": "k-na", "type": "kana", "jp": "な", "ro": "na",  "zy": "ㄋㄚ", "origin": "奈", "ex": {"jp": "なつ", "ro": "natsu", "zh": "夏天"}},
+    {"id": "k-ni", "type": "kana", "jp": "に", "ro": "ni",  "zy": "ㄋㄧ", "origin": "仁", "ex": {"jp": "にく", "ro": "niku", "zh": "肉"}},
+    {"id": "k-nu", "type": "kana", "jp": "ぬ", "ro": "nu",  "zy": "ㄋㄨ", "origin": "奴", "ex": {"jp": "いぬ", "ro": "inu", "zh": "狗"}},
+    {"id": "k-ne", "type": "kana", "jp": "ね", "ro": "ne",  "zy": "ㄋㄝ", "origin": "禰", "ex": {"jp": "ねこ", "ro": "neko", "zh": "貓"}},
+    {"id": "k-no", "type": "kana", "jp": "の", "ro": "no",  "zy": "ㄋㄛ", "origin": "乃", "ex": {"jp": "のみもの", "ro": "nomimono", "zh": "飲料"}},
+
+    {"id": "p-konnichiwa", "type": "phrase", "jp": "こんにちは", "ro": "konnichiwa", "zh": "你好（白天的招呼）", "tip": "最後的「は」在這裡唸 wa，不唸 ha。"},
+    {"id": "p-sumimasen", "type": "phrase", "jp": "すみません", "ro": "sumimasen", "zh": "不好意思／請問", "tip": "叫店員、問路、借過都用這句，是旅行最常用的一句。"},
+    {"id": "p-onegaishimasu", "type": "phrase", "jp": "おねがいします", "ro": "onegaishimasu", "zh": "麻煩您了／拜託", "tip": "點餐、請人幫忙時加在後面，聽起來有禮貌。"},
+    {"id": "p-korekudasai", "type": "phrase", "jp": "これ、ください", "ro": "kore, kudasai", "zh": "請給我這個", "tip": "一邊指著東西一邊說。想更客氣可以說「これ、おねがいします」。"},
+    {"id": "p-arigatou", "type": "phrase", "jp": "ありがとうございます", "ro": "arigatou gozaimasu", "zh": "謝謝您", "tip": "對陌生人用這個完整版；對朋友說「ありがとう」就好。"}
+  ],
+  "levels": [
+    {
+      "id": "p1", "title": "登機", "sub": "あ行", "new": ["k-a", "k-i", "k-u", "k-e", "k-o"],
+      "words": [
+        {"jp": "あい", "ro": "ai", "zh": "愛"},
+        {"jp": "うえ", "ro": "ue", "zh": "上面"},
+        {"jp": "いえ", "ro": "ie", "zh": "房子、家"},
+        {"jp": "あお", "ro": "ao", "zh": "藍色"}
+      ],
+      "story": [
+        {"scene": "找到座位了！頭頂的行李櫃貼著一張標示。", "speaker": "標示", "jp": "うえ", "ro": "ue", "ask": "這個標示是什麼意思？",
+         "choices": ["上面", "下面", "裡面", "出口"], "answer": 0, "explain": "うえ（ue）是「上面」。行李放在上面的櫃子。"},
+        {"scene": "飛機起飛了，たびまる貼著窗戶看外面的天空。", "speaker": "たびまる", "jp": "あお！", "ro": "ao!", "ask": "たびまる說的是什麼？",
+         "choices": ["好高", "藍色", "好冷", "雲"], "answer": 1, "explain": "あお（ao）是「藍色」。天空好藍！"}
+      ]
+    },
+    {
+      "id": "p2", "title": "翻開旅遊書", "sub": "か行", "new": ["k-ka", "k-ki", "k-ku", "k-ke", "k-ko"],
+      "words": [
+        {"jp": "えき", "ro": "eki", "zh": "車站"},
+        {"jp": "かお", "ro": "kao", "zh": "臉"},
+        {"jp": "あか", "ro": "aka", "zh": "紅色"},
+        {"jp": "こえ", "ro": "koe", "zh": "聲音"},
+        {"jp": "いけ", "ro": "ike", "zh": "池塘"},
+        {"jp": "きく", "ro": "kiku", "zh": "聽"}
+      ],
+      "story": [
+        {"scene": "旅遊書的地圖上，每個火車符號旁邊都寫著同一個字。", "speaker": "地圖", "jp": "えき", "ro": "eki", "ask": "這個字是什麼意思？",
+         "choices": ["機場", "車站", "飯店", "公園"], "answer": 1, "explain": "えき（eki）是「車站」。到福岡會一直看到它！"},
+        {"scene": "書上介紹日本的郵筒，旁邊的說明寫著顏色。", "speaker": "旅遊書", "jp": "あか", "ro": "aka", "ask": "郵筒是什麼顏色？",
+         "choices": ["藍色", "白色", "紅色", "黑色"], "answer": 2, "explain": "あか（aka）是「紅色」。日本的郵筒是紅色的。"}
+      ]
+    },
+    {
+      "id": "p3", "title": "機上餐車", "sub": "さ行", "new": ["k-sa", "k-shi", "k-su", "k-se", "k-so"],
+      "words": [
+        {"jp": "すし", "ro": "sushi", "zh": "壽司"},
+        {"jp": "さけ", "ro": "sake", "zh": "酒"},
+        {"jp": "あさ", "ro": "asa", "zh": "早上"},
+        {"jp": "かさ", "ro": "kasa", "zh": "雨傘"},
+        {"jp": "せき", "ro": "seki", "zh": "座位"},
+        {"jp": "いす", "ro": "isu", "zh": "椅子"}
+      ],
+      "story": [
+        {"scene": "餐車推過來了，有一瓶飲料的標籤上寫著：", "speaker": "標籤", "jp": "さけ", "ro": "sake", "ask": "這瓶是什麼？",
+         "choices": ["果汁", "茶", "水", "酒"], "answer": 3, "explain": "さけ（sake）是「酒」。不想喝酒就跳過它！"},
+        {"scene": "你拿出登機證確認，上面有一欄寫著：", "speaker": "登機證", "jp": "せき", "ro": "seki", "ask": "這一欄是什麼？",
+         "choices": ["座位", "姓名", "日期", "登機門"], "answer": 0, "explain": "せき（seki）是「座位」。搭新幹線時也會用到。"}
+      ]
+    },
+    {
+      "id": "p4", "title": "機上雜誌", "sub": "た行", "new": ["k-ta", "k-chi", "k-tsu", "k-te", "k-to"],
+      "words": [
+        {"jp": "ちかてつ", "ro": "chikatetsu", "zh": "地鐵"},
+        {"jp": "くつ", "ro": "kutsu", "zh": "鞋子"},
+        {"jp": "たこ", "ro": "tako", "zh": "章魚"},
+        {"jp": "した", "ro": "shita", "zh": "下面"},
+        {"jp": "あした", "ro": "ashita", "zh": "明天"},
+        {"jp": "とけい", "ro": "tokei", "zh": "時鐘、手錶"}
+      ],
+      "story": [
+        {"scene": "機上雜誌介紹福岡機場，說可以搭一種交通工具直達博多：", "speaker": "雜誌", "jp": "ちかてつ", "ro": "chikatetsu", "ask": "那是什麼交通工具？",
+         "choices": ["計程車", "地鐵", "巴士", "新幹線"], "answer": 1, "explain": "ちかてつ（chikatetsu）是「地鐵」。福岡機場的地鐵站離博多只有兩站。"},
+        {"scene": "翻到廣告頁，一個閃閃發亮的商品下面寫著：", "speaker": "廣告", "jp": "とけい", "ro": "tokei", "ask": "這是在賣什麼？",
+         "choices": ["鞋子", "章魚燒", "鐘錶", "書桌"], "answer": 2, "explain": "とけい（tokei）是「時鐘、手錶」。"}
+      ]
+    },
+    {
+      "id": "p5", "title": "鄰座的小朋友", "sub": "な行", "new": ["k-na", "k-ni", "k-nu", "k-ne", "k-no"],
+      "words": [
+        {"jp": "ねこ", "ro": "neko", "zh": "貓"},
+        {"jp": "いぬ", "ro": "inu", "zh": "狗"},
+        {"jp": "にく", "ro": "niku", "zh": "肉"},
+        {"jp": "なに", "ro": "nani", "zh": "什麼"},
+        {"jp": "なか", "ro": "naka", "zh": "裡面"},
+        {"jp": "おかね", "ro": "okane", "zh": "錢"}
+      ],
+      "story": [
+        {"scene": "隔壁的小朋友指著你手機桌布上的動物，歪著頭問：", "speaker": "小朋友", "jp": "なに？", "ro": "nani?", "ask": "小朋友在問什麼？",
+         "choices": ["好可愛！", "這是什麼？", "給我！", "你好！"], "answer": 1, "explain": "なに（nani）是「什麼」。語尾上揚就是在問問題。"},
+        {"scene": "桌布上是一隻貓。你想告訴小朋友「是貓喔」，要怎麼說？", "speaker": "", "jp": "", "ro": "", "ask": "「貓」的日文是？",
+         "choices": ["いぬ（inu）", "にく（niku）", "ねこ（neko）", "なか（naka）"], "answer": 2, "explain": "ねこ（neko）是「貓」。小朋友聽懂了，開心地笑了！"}
+      ]
+    },
+    {
+      "id": "p6", "title": "抵達之前", "sub": "旅遊招呼語", "new": ["p-konnichiwa", "p-sumimasen", "p-onegaishimasu", "p-korekudasai", "p-arigatou"],
+      "words": [],
+      "story": [
+        {"scene": "回想登機時，空服員在門口對你微笑：", "speaker": "空服員", "jp": "こんにちは。", "ro": "konnichiwa.", "ask": "你應該怎麼回應？",
+         "choices": ["こんにちは。", "これ、ください。", "すみません。"], "answer": 0, "explain": "別人打招呼，就用同一句回應：こんにちは（konnichiwa）。"},
+        {"scene": "你想喝水，空服員剛好走過你旁邊。你要先叫住她：", "speaker": "", "jp": "", "ro": "", "ask": "第一句要說什麼？",
+         "choices": ["ありがとうございます。", "すみません。", "こんにちは。"], "answer": 1, "explain": "叫住別人用すみません（sumimasen），意思像「不好意思～」。"},
+        {"scene": "空服員拿著毯子問你：", "speaker": "空服員", "jp": "もうふは いかがですか？", "ro": "moufu wa ikaga desu ka?", "ask": "她在問「要不要毯子？」。你想要，要怎麼回答？",
+         "choices": ["はい、おねがいします。", "すみません。", "こんにちは。"], "answer": 0, "explain": "はい（hai）是「好」，加上おねがいします（onegaishimasu）＝「好的，麻煩您了」。"},
+        {"scene": "空服員把毯子遞給你。", "speaker": "", "jp": "", "ro": "", "ask": "這時候要說：",
+         "choices": ["これ、ください。", "すみません。", "ありがとうございます。"], "answer": 2, "explain": "收到東西說ありがとうございます（arigatou gozaimasu），謝謝您。"},
+        {"scene": "免稅商品推車來了，你看到想買的福岡限定零食，指著它說：", "speaker": "", "jp": "", "ro": "", "ask": "你要說：",
+         "choices": ["これ、ください。", "こんにちは。", "ありがとうございます。"], "answer": 0, "explain": "指著商品說これ、ください（kore, kudasai），請給我這個。"}
+      ]
+    }
+  ]
+}
