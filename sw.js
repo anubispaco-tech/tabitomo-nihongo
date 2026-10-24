@@ -1,5 +1,5 @@
 // 離線快取：自家檔案網路優先（一推送就拿到新版，斷網時用快取），字型快取優先
-const VERSION = 'tabitomo-v0.1.0';
+const VERSION = 'tabitomo-v0.1.1';
 const SHELL = [
   './',
   'index.html',
