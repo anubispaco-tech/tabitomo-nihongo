@@ -21,10 +21,13 @@ css/style.css         日系養成風 UI
 js/app.js             畫面與互動
 js/engine.js          Leitner 5 盒 SRS、組題、旅伴成長、連續天數
 js/store.js           IndexedDB 存檔（失敗時退回 localStorage）
-js/audio.js           瀏覽器日文 TTS＋合成音效
+js/audio.js           發音（VOICEVOX 預錄音檔優先，退回瀏覽器 TTS）＋合成音效
 js/plants.js          植物 SVG（櫻花樹、龜背芋、鹿角蕨，各 4 階段）
 data/prologue.json    序章題庫
-sw.js                 離線快取
+sw.js                 離線快取（含音檔預載）
+audio/                VOICEVOX 產生的音檔（n＝正常、s＝慢速）與 manifest.json
+tools/gen-audio.mjs   音檔產生腳本
+.github/workflows/voice.yml  在 GitHub Actions 上跑 VOICEVOX 產生音檔
 ```
 
 ## 部署
@@ -42,3 +45,13 @@ python3 -m http.server 8000
 ## 內容來源
 
 序章的假名、例字與會話句由 Claude 以日語教師角度編寫並審稿；字源與注音近似音僅供記憶參考。第 1 章起單字預計使用 JMdict、例句使用 Tatoeba，並依授權標示出處。
+
+## 發音音檔（VOICEVOX）
+
+App 會唸到的每一句日文，都由 [VOICEVOX](https://voicevox.hiroshiba.jp/) 預先合成成 mp3，正常速度和慢速各一份。慢速是另外合成的，不是播放時拉長，聲音才不會變形。沒有音檔的句子，會自動退回使用瀏覽器內建的語音。
+
+- **自動**：推送 `data/` 或 `js/` 的變更後，Actions 會自動補產生新句子的音檔並提交回來。
+- **手動／換聲音**：Actions › 產生發音音檔 › Run workflow
+  - `mode = samples`：產生各候選聲音的試聽檔到 `audio/_samples/`
+  - `mode = generate`、`speaker = 角色名`：用指定的聲音重新產生全部音檔
+- 使用聲音前，請先確認該角色的使用規約；App 內會自動標示「VOICEVOX:角色名」。

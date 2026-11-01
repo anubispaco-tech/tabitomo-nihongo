@@ -1,5 +1,50 @@
-// 發音（瀏覽器內建日文 TTS）與答題音效（WebAudio 合成，無音檔）
+// 發音：優先播放 VOICEVOX 預錄音檔（audio/manifest.json），沒有才退回瀏覽器內建日文 TTS
+// 答題音效：WebAudio 合成，無音檔
 let jaVoice = null;
+
+// iOS 預設把 WebAudio 歸在「環境音」，靜音開關一撥就沒聲音；改成「播放」類別
+try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) { /* 不支援就算了 */ }
+
+let clips = null; // { speaker, credit, files: { 日文: hash } }
+let clipsSettled = false;
+const clipsReady = fetch('audio/manifest.json', { cache: 'no-cache' })
+  .then(r => (r.ok ? r.json() : null))
+  .then(m => { clips = m && m.files ? m : null; })
+  .catch(() => {})
+  .finally(() => { clipsSettled = true; });
+
+const buffers = new Map();
+let current = null;
+let playToken = 0;
+
+function loadBuffer(c, url) {
+  let p = buffers.get(url);
+  if (!p) {
+    p = fetch(url)
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+      .then(b => new Promise((res, rej) => c.decodeAudioData(b, res, rej)));
+    buffers.set(url, p);
+    p.catch(() => buffers.delete(url));
+  }
+  return p;
+}
+
+function stopAll() {
+  try { current?.stop(); } catch (e) { /* 已經停了 */ }
+  current = null;
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+function ttsSpeak(text, slow) {
+  if (!('speechSynthesis' in window)) return;
+  // 單一假名太短，iOS 常吃掉開頭：加停頓唸兩次
+  const t = [...text.trim()].length === 1 ? `${text}、${text}` : text;
+  const u = new SpeechSynthesisUtterance(t);
+  u.lang = 'ja-JP';
+  if (jaVoice) u.voice = jaVoice;
+  u.rate = slow ? 0.75 : 0.9; // iOS 的語速不是線性的，0.6 會讓聲音變形
+  speechSynthesis.speak(u);
+}
 
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
@@ -16,16 +61,36 @@ if ('speechSynthesis' in window) {
 }
 
 export const speech = {
-  supported: () => 'speechSynthesis' in window,
+  ready: clipsReady,
+  supported: () => !!clips || 'speechSynthesis' in window,
   hasJapanese: () => !!jaVoice,
+  hasClips: () => !!clips,
+  credit: () => clips?.credit || '',
   speak(text, { slow = false } = {}) {
-    if (!('speechSynthesis' in window) || !text) return;
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ja-JP';
-    if (jaVoice) u.voice = jaVoice;
-    u.rate = slow ? 0.6 : 0.9;
-    speechSynthesis.speak(u);
+    if (!text) return;
+    const token = ++playToken;
+    stopAll();
+    // 確定沒有預錄音檔時，同步走 TTS（iOS 要在點擊當下呼叫才會出聲）
+    if (clipsSettled && !clips?.files?.[text]) { ttsSpeak(text, slow); return; }
+    const c = audioCtx(); // 一定要在點擊當下同步建立／喚醒，iOS 才會出聲
+    const run = async () => {
+      if (!clips) await clipsReady;
+      const h = clips?.files?.[text];
+      if (h && c) {
+        try {
+          const buf = await loadBuffer(c, `audio/${slow ? 's' : 'n'}/${h}.mp3`);
+          if (token !== playToken) return; // 期間又按了別的，就不播舊的
+          const src = c.createBufferSource();
+          src.buffer = buf;
+          src.connect(c.destination);
+          src.start();
+          current = src;
+          return;
+        } catch (e) { /* 音檔壞掉或離線沒快取 → 退回 TTS */ }
+      }
+      if (token === playToken) ttsSpeak(text, slow);
+    };
+    run();
   },
 };
 

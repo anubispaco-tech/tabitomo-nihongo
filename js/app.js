@@ -238,11 +238,13 @@ function viewSettings() {
   const toggle = (key, label, desc) => `
     <label class="setting"><span><b>${label}</b><small>${desc}</small></span>
       <input type="checkbox" data-action="toggle" data-key="${key}" ${st[key] ? 'checked' : ''}><i class="sw"></i></label>`;
-  const ttsNote = !speech.supported()
-    ? '這個瀏覽器不支援語音朗讀。'
-    : speech.hasJapanese()
-      ? '已找到日文語音。'
-      : '還沒找到日文語音。iPhone 可到「設定 › 輔助使用 › 朗讀內容 › 聲音 › 日文」下載語音。';
+  const ttsNote = speech.hasClips()
+    ? `使用預錄真人風格語音（${esc(speech.credit())}），離線也能播放。`
+    : !speech.supported()
+      ? '這個瀏覽器不支援語音朗讀。'
+      : speech.hasJapanese()
+        ? '已找到日文語音。'
+        : '還沒找到日文語音。iPhone 可到「設定 › 輔助使用 › 朗讀內容 › 聲音 › 日文」下載語音。';
   return `
     <header class="top"><h1>設定</h1></header>
     <section class="settings">
@@ -263,6 +265,7 @@ function viewSettings() {
     <section class="settings about">
       <p>旅伴日語 Tabitomo・序章原型 v0.1</p>
       <p class="hint-text">序章的假名、例字與會話句由 Claude 以日語教師角度編寫並審稿；字源與注音近似音僅供記憶參考，發音以語音為準。第 1 章起單字將改用 JMdict、例句使用 Tatoeba（皆依授權標示出處）。</p>
+      ${speech.hasClips() ? `<p class="hint-text">語音：${esc(speech.credit())}（由 VOICEVOX 合成）</p>` : ''}
     </section>`;
 }
 
