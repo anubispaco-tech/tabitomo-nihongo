@@ -1,5 +1,5 @@
 // 離線快取：自家檔案網路優先（一推送就拿到新版，斷網時用快取），字型快取優先
-const VERSION = 'tabitomo-v0.3.0';
+const VERSION = 'tabitomo-v0.3.1';
 const AUDIO = 'tabitomo-audio'; // 音檔檔名是內容雜湊，不會變，獨立快取、換版不清
 const SHELL = [
   './',

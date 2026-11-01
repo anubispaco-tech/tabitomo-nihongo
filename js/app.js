@@ -406,8 +406,13 @@ function viewSpell(st) {
   const tiles = s.tiles.map((t, i) => `<button class="tile jp" data-action="tile" data-i="${i}" ${filled.includes(i) || done ? 'disabled' : ''}>${esc(t)}</button>`).join('');
   return `
     <p class="ask">聽發音，用假名拼出來</p>
+    <p class="hint-text center">點下面的假名會唸給你聽，可以一個一個比對</p>
     <div class="prompt">
       <button class="listen" data-action="say" data-text="${esc(s.word.jp)}" aria-label="再聽一次"><i class="ic ic-sound"></i></button>
+      <div class="row-btns">
+        <button class="link" data-action="say-slow" data-text="${esc(s.word.jp)}">慢速再聽</button>
+        <button class="link" data-action="say-spell" data-text="${esc(s.word.jp)}">一個字一個字聽</button>
+      </div>
       <p class="zh-big">${esc(s.word.zh)}</p>
       ${st.hint || done ? ro(s.word.ro) : ''}
     </div>
@@ -489,6 +494,7 @@ function answerStory(i) {
 function tapTile(i) {
   const st = curStep();
   if (session.answered) return;
+  if (!(st.filled || []).includes(i)) say(st.s.tiles[i]); // 點了就唸，邊拼邊比對
   st.filled = st.filled || [];
   if (st.filled.includes(i)) return;
   st.filled.push(i);
@@ -687,6 +693,7 @@ app.addEventListener('click', e => {
     case 'next': nextStep(); break;
     case 'say': say(el.dataset.text); break;
     case 'say-slow': say(el.dataset.text, { slow: true }); break;
+    case 'say-spell': speech.spell(el.dataset.text, { slow: state.settings.slow }); break;
     case 'opt': curStep().type === 'story' ? answerStory(i) : answerQuestion(i); break;
     case 'hint': {
       const st = curStep();

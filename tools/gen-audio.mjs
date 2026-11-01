@@ -6,7 +6,7 @@
 // 需要 ffmpeg（wav → mp3）。
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,10 +19,13 @@ const DEFAULT_STYLE = 'ノーマル';
 
 // 語速設定：正常偏慢一點點；慢速另外合成，不靠播放器拉長，聲音才不會變形
 const PROFILES = {
-  n: { speedScale: 0.92, pauseLengthScale: 1.2, prePhonemeLength: 0.2, postPhonemeLength: 0.3 },
-  s: { speedScale: 0.7, pauseLengthScale: 1.8, prePhonemeLength: 0.25, postPhonemeLength: 0.4 },
+  n: { speedScale: 0.85, pauseLengthScale: 1.3, prePhonemeLength: 0.2, postPhonemeLength: 0.3 },
+  s: { speedScale: 0.65, pauseLengthScale: 1.8, prePhonemeLength: 0.25, postPhonemeLength: 0.4 },
 };
-const PARAMS_VERSION = 1; // 改了 PROFILES 就 +1，讓全部重新產生
+const PARAMS_VERSION = 2; // 改了 PROFILES 或後製就 +1，讓全部重新產生
+// 後製：濾掉低頻雜音、加強 3kHz 咬字頻段（手機喇叭比較聽得清楚），再把峰值拉到 -1 dBFS
+const EQ = 'highpass=f=80,equalizer=f=3000:t=q:w=1.2:g=4';
+const PEAK_DB = -1;
 
 const SAMPLE_CANDIDATES = ['冥鳴ひまり', '四国めたん', '春日部つむぎ', '九州そら', 'WhiteCUL', 'No.7', '玄野武宏', '青山龍星'];
 const SAMPLE_TEXT = 'あ、い、う、え、お。こんにちは。これ、ください。';
@@ -99,7 +102,12 @@ function toMp3(wav, file) {
   mkdirSync(dirname(file), { recursive: true });
   const tmp = file + '.wav';
   writeFileSync(tmp, wav);
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-ac', '1', '-codec:a', 'libmp3lame', '-b:a', '64k', file]);
+  // 先量 EQ 之後的峰值，再補增益（VOICEVOX 原始音量偏小，單一假名尤其小聲）
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-i', tmp, '-af', `${EQ},volumedetect`, '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = /max_volume:\s*(-?[\d.]+) dB/.exec(r.stderr || '');
+  const gain = m ? Math.min(30, PEAK_DB - parseFloat(m[1])) : 0;
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-af', `${EQ},volume=${gain.toFixed(1)}dB,alimiter=limit=0.95`,
+    '-ac', '1', '-codec:a', 'libmp3lame', '-b:a', '64k', file]);
   unlinkSync(tmp);
 }
 

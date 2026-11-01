@@ -15,6 +15,7 @@ const clipsReady = fetch('audio/manifest.json', { cache: 'no-cache' })
 
 const buffers = new Map();
 let current = null;
+const scheduled = new Set();
 let playToken = 0;
 
 function loadBuffer(c, url) {
@@ -31,6 +32,8 @@ function loadBuffer(c, url) {
 
 function stopAll() {
   try { current?.stop(); } catch (e) { /* 已經停了 */ }
+  scheduled.forEach(src => { try { src.stop(); } catch (e) { /* 已經停了 */ } });
+  scheduled.clear();
   current = null;
   if ('speechSynthesis' in window) speechSynthesis.cancel();
 }
@@ -89,6 +92,34 @@ export const speech = {
         } catch (e) { /* 音檔壞掉或離線沒快取 → 退回 TTS */ }
       }
       if (token === playToken) ttsSpeak(text, slow);
+    };
+    run();
+  },
+  // 一個字一個字唸（每個假名用單字音檔，中間停一下）；有缺音檔的字就退回整句 TTS
+  spell(text, { slow = false } = {}) {
+    const chars = [...text].filter(ch => /[\u3040-\u30ff]/.test(ch));
+    if (!chars.length) return;
+    const token = ++playToken;
+    stopAll();
+    const c = audioCtx();
+    const run = async () => {
+      if (!clips) await clipsReady;
+      const hashes = chars.map(ch => clips?.files?.[ch]);
+      if (!c || hashes.some(h => !h)) { if (token === playToken) ttsSpeak(chars.join('、'), true); return; }
+      try {
+        const bufs = await Promise.all(hashes.map(h => loadBuffer(c, `audio/${slow ? 's' : 'n'}/${h}.mp3`)));
+        if (token !== playToken) return;
+        let t = c.currentTime + 0.05;
+        bufs.forEach(buf => {
+          const src = c.createBufferSource();
+          src.buffer = buf;
+          src.connect(c.destination);
+          src.start(t);
+          scheduled.add(src);
+          src.onended = () => scheduled.delete(src);
+          t += buf.duration + 0.15;
+        });
+      } catch (e) { if (token === playToken) ttsSpeak(chars.join('、'), true); }
     };
     run();
   },

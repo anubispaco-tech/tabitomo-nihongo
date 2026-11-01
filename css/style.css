@@ -77,6 +77,7 @@ h2 { font-size: 17px; margin: 28px 0 10px; }
 .btn.file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .link { color: var(--ai-2); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 8px; }
 .hint-text { font-size: 13px; color: var(--ai-2); margin: 8px 0; }
+.hint-text.center { text-align: center; margin-top: -4px; }
 .tag { display: inline-block; margin: 0 0 8px; padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 600;
   background: var(--take-soft); color: #2F7B60; }
 .tag.soft { background: var(--yamabuki-soft); color: #8A6200; }
