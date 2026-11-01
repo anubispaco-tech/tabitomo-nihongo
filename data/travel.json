@@ -1,0 +1,293 @@
+{
+  "chapter": "travel",
+  "title": "福岡會話",
+  "note": "情境對話是模擬的，店員實際說法會有些不同；聽不懂時用「もう一度お願いします」或「ゆっくり話してください」就好。點句子可以放大給店員看。",
+  "scenes": [
+    {
+      "id": "t-food", "icon": "🍜", "title": "餐廳", "sub": "入座・點餐・結帳",
+      "phrases": [
+        {"jp": "大人2人と子ども1人です。", "kana": "おとな ふたりと こども ひとりです。", "ro": "otona futari to kodomo hitori desu.", "zh": "兩個大人、一個小孩。"},
+        {"jp": "子ども用の椅子はありますか？", "kana": "こどもようの いすは ありますか？", "ro": "kodomo-you no isu wa arimasu ka?", "zh": "有兒童椅嗎？"},
+        {"jp": "メニューをお願いします。", "kana": "メニューを おねがいします。", "ro": "menyuu o onegai shimasu.", "zh": "麻煩給我菜單。"},
+        {"jp": "おすすめは何ですか？", "kana": "おすすめは なんですか？", "ro": "osusume wa nan desu ka?", "zh": "推薦什麼？"},
+        {"jp": "これを2つください。", "kana": "これを ふたつ ください。", "ro": "kore o futatsu kudasai.", "zh": "這個請給我兩份。"},
+        {"jp": "取り皿をください。", "kana": "とりざらを ください。", "ro": "torizara o kudasai.", "zh": "請給我小盤子（分食用）。"},
+        {"jp": "お水をください。", "kana": "おみずを ください。", "ro": "omizu o kudasai.", "zh": "請給我水。"},
+        {"jp": "お会計お願いします。", "kana": "おかいけい おねがいします。", "ro": "okaikei onegai shimasu.", "zh": "麻煩結帳。"},
+        {"jp": "カードで払えますか？", "kana": "カードで はらえますか？", "ro": "kaado de haraemasu ka?", "zh": "可以刷卡嗎？"},
+        {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待（吃飽離開時說）。"}
+      ],
+      "roleplay": {
+        "title": "在天神吃水炊鍋",
+        "intro": "一家三口走進餐廳，店員過來招呼你。",
+        "turns": [
+          {"who": "staff", "jp": "いらっしゃいませ。何名様ですか？", "kana": "いらっしゃいませ。なんめいさまですか？", "ro": "irasshaimase. nanmei-sama desu ka?", "zh": "歡迎光臨，請問幾位？"},
+          {"who": "me", "goal": "告訴店員：兩個大人、一個小孩", "answer": 0, "options": [
+            {"jp": "大人2人と子ども1人です。", "kana": "おとな ふたりと こども ひとりです。", "ro": "otona futari to kodomo hitori desu.", "zh": "兩個大人、一個小孩。"},
+            {"jp": "お会計お願いします。", "kana": "おかいけい おねがいします。", "ro": "okaikei onegai shimasu.", "zh": "麻煩結帳。"},
+            {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待。"}
+          ]},
+          {"who": "staff", "jp": "こちらへどうぞ。", "kana": "こちらへ どうぞ。", "ro": "kochira e douzo.", "zh": "這邊請。"},
+          {"who": "me", "goal": "小孩需要兒童椅，問店員有沒有", "answer": 1, "options": [
+            {"jp": "お水をください。", "kana": "おみずを ください。", "ro": "omizu o kudasai.", "zh": "請給我水。"},
+            {"jp": "子ども用の椅子はありますか？", "kana": "こどもようの いすは ありますか？", "ro": "kodomo-you no isu wa arimasu ka?", "zh": "有兒童椅嗎？"},
+            {"jp": "おすすめは何ですか？", "kana": "おすすめは なんですか？", "ro": "osusume wa nan desu ka?", "zh": "推薦什麼？"}
+          ]},
+          {"who": "staff", "jp": "はい、お持ちしますね。", "kana": "はい、おもちしますね。", "ro": "hai, omochi shimasu ne.", "zh": "好的，我拿過來。"},
+          {"who": "staff", "jp": "ご注文はお決まりですか？", "kana": "ごちゅうもんは おきまりですか？", "ro": "gochuumon wa okimari desu ka?", "zh": "決定好要點什麼了嗎？"},
+          {"who": "me", "goal": "指著菜單，點兩份", "answer": 2, "options": [
+            {"jp": "取り皿をください。", "kana": "とりざらを ください。", "ro": "torizara o kudasai.", "zh": "請給我小盤子。"},
+            {"jp": "カードで払えますか？", "kana": "カードで はらえますか？", "ro": "kaado de haraemasu ka?", "zh": "可以刷卡嗎？"},
+            {"jp": "これを2つください。", "kana": "これを ふたつ ください。", "ro": "kore o futatsu kudasai.", "zh": "這個請給我兩份。"}
+          ]},
+          {"who": "staff", "jp": "かしこまりました。", "kana": "かしこまりました。", "ro": "kashikomarimashita.", "zh": "好的，明白了。"},
+          {"who": "me", "goal": "吃完了，到櫃台要結帳", "answer": 0, "options": [
+            {"jp": "お会計お願いします。", "kana": "おかいけい おねがいします。", "ro": "okaikei onegai shimasu.", "zh": "麻煩結帳。"},
+            {"jp": "メニューをお願いします。", "kana": "メニューを おねがいします。", "ro": "menyuu o onegai shimasu.", "zh": "麻煩給我菜單。"},
+            {"jp": "大人2人と子ども1人です。", "kana": "おとな ふたりと こども ひとりです。", "ro": "otona futari to kodomo hitori desu.", "zh": "兩個大人、一個小孩。"}
+          ]},
+          {"who": "staff", "jp": "4,800円です。", "kana": "よんせん はっぴゃくえんです。", "ro": "yonsen happyaku en desu.", "zh": "4,800 日圓。"},
+          {"who": "me", "goal": "想用信用卡付", "answer": 1, "options": [
+            {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待。"},
+            {"jp": "カードで払えますか？", "kana": "カードで はらえますか？", "ro": "kaado de haraemasu ka?", "zh": "可以刷卡嗎？"},
+            {"jp": "お水をください。", "kana": "おみずを ください。", "ro": "omizu o kudasai.", "zh": "請給我水。"}
+          ]},
+          {"who": "staff", "jp": "はい、大丈夫です。", "kana": "はい、だいじょうぶです。", "ro": "hai, daijoubu desu.", "zh": "可以的，沒問題。"},
+          {"who": "me", "goal": "付完錢離開，跟店員道謝", "answer": 2, "options": [
+            {"jp": "これを2つください。", "kana": "これを ふたつ ください。", "ro": "kore o futatsu kudasai.", "zh": "這個請給我兩份。"},
+            {"jp": "いらっしゃいませ。", "kana": "いらっしゃいませ。", "ro": "irasshaimase.", "zh": "歡迎光臨（店員說的）。"},
+            {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待。"}
+          ]},
+          {"who": "staff", "jp": "ありがとうございました。", "kana": "ありがとうございました。", "ro": "arigatou gozaimashita.", "zh": "謝謝光臨。"}
+        ]
+      }
+    },
+    {
+      "id": "t-konbini", "icon": "🏪", "title": "便利商店", "sub": "加熱・袋子・付款",
+      "phrases": [
+        {"jp": "これください。", "kana": "これ ください。", "ro": "kore kudasai.", "zh": "我要這個。"},
+        {"jp": "温めてください。", "kana": "あたためて ください。", "ro": "atatamete kudasai.", "zh": "請幫我加熱。"},
+        {"jp": "袋はいりません。", "kana": "ふくろは いりません。", "ro": "fukuro wa irimasen.", "zh": "不用袋子。"},
+        {"jp": "袋をください。", "kana": "ふくろを ください。", "ro": "fukuro o kudasai.", "zh": "請給我袋子。"},
+        {"jp": "スプーンをください。", "kana": "スプーンを ください。", "ro": "supuun o kudasai.", "zh": "請給我湯匙。"},
+        {"jp": "スイカで払います。", "kana": "スイカで はらいます。", "ro": "suika de haraimasu.", "zh": "我用 Suica 付。"},
+        {"jp": "はい、お願いします。", "kana": "はい、おねがいします。", "ro": "hai, onegai shimasu.", "zh": "好，麻煩你了。"},
+        {"jp": "いいえ、大丈夫です。", "kana": "いいえ、だいじょうぶです。", "ro": "iie, daijoubu desu.", "zh": "不用了，沒關係（婉拒）。"}
+      ],
+      "roleplay": {
+        "title": "在 7-11 買早餐",
+        "intro": "你拿了一個便當和一瓶果汁，到櫃台結帳。",
+        "turns": [
+          {"who": "staff", "jp": "いらっしゃいませ。こちら温めますか？", "kana": "いらっしゃいませ。こちら あたためますか？", "ro": "irasshaimase. kochira atatamemasu ka?", "zh": "歡迎光臨。這個要加熱嗎？"},
+          {"who": "me", "goal": "便當要加熱", "answer": 0, "options": [
+            {"jp": "はい、お願いします。", "kana": "はい、おねがいします。", "ro": "hai, onegai shimasu.", "zh": "好，麻煩你了。"},
+            {"jp": "袋はいりません。", "kana": "ふくろは いりません。", "ro": "fukuro wa irimasen.", "zh": "不用袋子。"},
+            {"jp": "スイカで払います。", "kana": "スイカで はらいます。", "ro": "suika de haraimasu.", "zh": "我用 Suica 付。"}
+          ]},
+          {"who": "staff", "jp": "お箸はお付けしますか？", "kana": "おはしは おつけしますか？", "ro": "ohashi wa otsuke shimasu ka?", "zh": "需要附筷子嗎？"},
+          {"who": "me", "goal": "小孩用不了筷子，改要湯匙", "answer": 2, "options": [
+            {"jp": "温めてください。", "kana": "あたためて ください。", "ro": "atatamete kudasai.", "zh": "請幫我加熱。"},
+            {"jp": "袋をください。", "kana": "ふくろを ください。", "ro": "fukuro o kudasai.", "zh": "請給我袋子。"},
+            {"jp": "スプーンをください。", "kana": "スプーンを ください。", "ro": "supuun o kudasai.", "zh": "請給我湯匙。"}
+          ]},
+          {"who": "staff", "jp": "袋はご利用ですか？", "kana": "ふくろは ごりようですか？", "ro": "fukuro wa goriyou desu ka?", "zh": "需要袋子嗎？"},
+          {"who": "me", "goal": "自己有帶購物袋，婉拒", "answer": 1, "options": [
+            {"jp": "はい、お願いします。", "kana": "はい、おねがいします。", "ro": "hai, onegai shimasu.", "zh": "好，麻煩你了。"},
+            {"jp": "いいえ、大丈夫です。", "kana": "いいえ、だいじょうぶです。", "ro": "iie, daijoubu desu.", "zh": "不用了，沒關係。"},
+            {"jp": "これください。", "kana": "これ ください。", "ro": "kore kudasai.", "zh": "我要這個。"}
+          ]},
+          {"who": "staff", "jp": "お支払いはどうされますか？", "kana": "おしはらいは どう されますか？", "ro": "oshiharai wa dou saremasu ka?", "zh": "要怎麼付款？"},
+          {"who": "me", "goal": "用手機裡的 Suica 付款", "answer": 0, "options": [
+            {"jp": "スイカで払います。", "kana": "スイカで はらいます。", "ro": "suika de haraimasu.", "zh": "我用 Suica 付。"},
+            {"jp": "温めてください。", "kana": "あたためて ください。", "ro": "atatamete kudasai.", "zh": "請幫我加熱。"},
+            {"jp": "スプーンをください。", "kana": "スプーンを ください。", "ro": "supuun o kudasai.", "zh": "請給我湯匙。"}
+          ]},
+          {"who": "staff", "jp": "こちらにタッチしてください。", "kana": "こちらに タッチして ください。", "ro": "kochira ni tacchi shite kudasai.", "zh": "請在這裡感應。"},
+          {"who": "staff", "jp": "ありがとうございました。", "kana": "ありがとうございました。", "ro": "arigatou gozaimashita.", "zh": "謝謝光臨。"}
+        ]
+      }
+    },
+    {
+      "id": "t-train", "icon": "🚃", "title": "車站與電車", "sub": "月台・電梯・座位",
+      "phrases": [
+        {"jp": "博多駅はどこですか？", "kana": "はかたえきは どこですか？", "ro": "hakata-eki wa doko desu ka?", "zh": "博多車站在哪裡？"},
+        {"jp": "この電車は博多に行きますか？", "kana": "この でんしゃは はかたに いきますか？", "ro": "kono densha wa hakata ni ikimasu ka?", "zh": "這班車會到博多嗎？"},
+        {"jp": "何番線ですか？", "kana": "なんばんせんですか？", "ro": "nanbansen desu ka?", "zh": "在第幾月台？"},
+        {"jp": "エレベーターはどこですか？", "kana": "エレベーターは どこですか？", "ro": "erebeetaa wa doko desu ka?", "zh": "電梯在哪裡？"},
+        {"jp": "ゆふいんの森は何番線ですか？", "kana": "ゆふいんのもりは なんばんせんですか？", "ro": "yufuin no mori wa nanbansen desu ka?", "zh": "由布院之森在第幾月台？"},
+        {"jp": "すみません、そこは私の席です。", "kana": "すみません、そこは わたしの せきです。", "ro": "sumimasen, soko wa watashi no seki desu.", "zh": "不好意思，那是我的位子。"},
+        {"jp": "次は何駅ですか？", "kana": "つぎは なにえきですか？", "ro": "tsugi wa nani-eki desu ka?", "zh": "下一站是哪一站？"},
+        {"jp": "どこで降りればいいですか？", "kana": "どこで おりれば いいですか？", "ro": "doko de orireba ii desu ka?", "zh": "我要在哪裡下車？"}
+      ],
+      "roleplay": {
+        "title": "搭由布院之森",
+        "intro": "11/25 早上在博多車站，你要找由布院之森的月台，還推著嬰兒車。（月台號碼是模擬的，請以現場看板為準）",
+        "turns": [
+          {"who": "me", "goal": "攔住站務員，先禮貌地開口", "answer": 1, "options": [
+            {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待。"},
+            {"jp": "すみません。", "kana": "すみません。", "ro": "sumimasen.", "zh": "不好意思（叫住別人）。"},
+            {"jp": "ありがとうございました。", "kana": "ありがとうございました。", "ro": "arigatou gozaimashita.", "zh": "謝謝（用過去式，結束時說）。"}
+          ]},
+          {"who": "staff", "jp": "はい、どうしましたか？", "kana": "はい、どう しましたか？", "ro": "hai, dou shimashita ka?", "zh": "是，怎麼了嗎？"},
+          {"who": "me", "goal": "問由布院之森在第幾月台", "answer": 0, "options": [
+            {"jp": "ゆふいんの森は何番線ですか？", "kana": "ゆふいんのもりは なんばんせんですか？", "ro": "yufuin no mori wa nanbansen desu ka?", "zh": "由布院之森在第幾月台？"},
+            {"jp": "次は何駅ですか？", "kana": "つぎは なにえきですか？", "ro": "tsugi wa nani-eki desu ka?", "zh": "下一站是哪一站？"},
+            {"jp": "博多駅はどこですか？", "kana": "はかたえきは どこですか？", "ro": "hakata-eki wa doko desu ka?", "zh": "博多車站在哪裡？"}
+          ]},
+          {"who": "staff", "jp": "5番線です。", "kana": "ごばんせんです。", "ro": "gobansen desu.", "zh": "在 5 號月台。"},
+          {"who": "me", "goal": "推著嬰兒車，問電梯在哪", "answer": 2, "options": [
+            {"jp": "どこで降りればいいですか？", "kana": "どこで おりれば いいですか？", "ro": "doko de orireba ii desu ka?", "zh": "我要在哪裡下車？"},
+            {"jp": "何番線ですか？", "kana": "なんばんせんですか？", "ro": "nanbansen desu ka?", "zh": "在第幾月台？"},
+            {"jp": "エレベーターはどこですか？", "kana": "エレベーターは どこですか？", "ro": "erebeetaa wa doko desu ka?", "zh": "電梯在哪裡？"}
+          ]},
+          {"who": "staff", "jp": "あちらにあります。", "kana": "あちらに あります。", "ro": "achira ni arimasu.", "zh": "在那邊。"},
+          {"who": "me", "goal": "上車後，發現有人坐在你的指定席", "answer": 1, "options": [
+            {"jp": "この電車は博多に行きますか？", "kana": "この でんしゃは はかたに いきますか？", "ro": "kono densha wa hakata ni ikimasu ka?", "zh": "這班車會到博多嗎？"},
+            {"jp": "すみません、そこは私の席です。", "kana": "すみません、そこは わたしの せきです。", "ro": "sumimasen, soko wa watashi no seki desu.", "zh": "不好意思，那是我的位子。"},
+            {"jp": "エレベーターはどこですか？", "kana": "エレベーターは どこですか？", "ro": "erebeetaa wa doko desu ka?", "zh": "電梯在哪裡？"}
+          ]},
+          {"who": "staff", "jp": "あっ、すみません！", "kana": "あっ、すみません！", "ro": "a', sumimasen!", "zh": "啊，不好意思！"}
+        ]
+      }
+    },
+    {
+      "id": "t-hotel", "icon": "🏨", "title": "飯店", "sub": "入住・寄放行李・早餐",
+      "phrases": [
+        {"jp": "チェックインお願いします。", "kana": "チェックイン おねがいします。", "ro": "chekkuin onegai shimasu.", "zh": "麻煩辦理入住。"},
+        {"jp": "予約したソンです。", "kana": "よやくした ソンです。", "ro": "yoyaku shita son desu.", "zh": "我是有預約的孫。"},
+        {"jp": "荷物を預かってもらえますか？", "kana": "にもつを あずかって もらえますか？", "ro": "nimotsu o azukatte moraemasu ka?", "zh": "可以幫我寄放行李嗎？"},
+        {"jp": "朝ごはんは何時からですか？", "kana": "あさごはんは なんじからですか？", "ro": "asagohan wa nanji kara desu ka?", "zh": "早餐幾點開始？"},
+        {"jp": "チェックアウトは何時ですか？", "kana": "チェックアウトは なんじですか？", "ro": "chekkuauto wa nanji desu ka?", "zh": "幾點退房？"},
+        {"jp": "ベビーベッドはありますか？", "kana": "ベビーベッドは ありますか？", "ro": "bebii beddo wa arimasu ka?", "zh": "有嬰兒床嗎？"},
+        {"jp": "ワイファイのパスワードは何ですか？", "kana": "ワイファイの パスワードは なんですか？", "ro": "waifai no pasuwaado wa nan desu ka?", "zh": "Wi-Fi 密碼是什麼？"},
+        {"jp": "はい、どうぞ。", "kana": "はい、どうぞ。", "ro": "hai, douzo.", "zh": "好的，請（遞東西時說）。"}
+      ],
+      "roleplay": {
+        "title": "博多的飯店入住",
+        "intro": "下午抵達飯店櫃台，還沒到入住時間，想先寄放行李。",
+        "turns": [
+          {"who": "staff", "jp": "いらっしゃいませ。", "kana": "いらっしゃいませ。", "ro": "irasshaimase.", "zh": "歡迎光臨。"},
+          {"who": "me", "goal": "說明你是有預約的客人", "answer": 0, "options": [
+            {"jp": "予約したソンです。", "kana": "よやくした ソンです。", "ro": "yoyaku shita son desu.", "zh": "我是有預約的孫。"},
+            {"jp": "チェックアウトは何時ですか？", "kana": "チェックアウトは なんじですか？", "ro": "chekkuauto wa nanji desu ka?", "zh": "幾點退房？"},
+            {"jp": "ベビーベッドはありますか？", "kana": "ベビーベッドは ありますか？", "ro": "bebii beddo wa arimasu ka?", "zh": "有嬰兒床嗎？"}
+          ]},
+          {"who": "staff", "jp": "ソン様ですね。チェックインは3時からです。", "kana": "ソンさまですね。チェックインは さんじからです。", "ro": "son-sama desu ne. chekkuin wa sanji kara desu.", "zh": "孫先生對吧。入住是 3 點開始。"},
+          {"who": "me", "goal": "還不能入住，請他先幫忙寄放行李", "answer": 2, "options": [
+            {"jp": "チェックインお願いします。", "kana": "チェックイン おねがいします。", "ro": "chekkuin onegai shimasu.", "zh": "麻煩辦理入住。"},
+            {"jp": "朝ごはんは何時からですか？", "kana": "あさごはんは なんじからですか？", "ro": "asagohan wa nanji kara desu ka?", "zh": "早餐幾點開始？"},
+            {"jp": "荷物を預かってもらえますか？", "kana": "にもつを あずかって もらえますか？", "ro": "nimotsu o azukatte moraemasu ka?", "zh": "可以幫我寄放行李嗎？"}
+          ]},
+          {"who": "staff", "jp": "はい、かしこまりました。パスポートをお願いします。", "kana": "はい、かしこまりました。パスポートを おねがいします。", "ro": "hai, kashikomarimashita. pasupooto o onegai shimasu.", "zh": "好的。麻煩出示護照。"},
+          {"who": "me", "goal": "把護照遞給他", "answer": 1, "options": [
+            {"jp": "いいえ、大丈夫です。", "kana": "いいえ、だいじょうぶです。", "ro": "iie, daijoubu desu.", "zh": "不用了，沒關係。"},
+            {"jp": "はい、どうぞ。", "kana": "はい、どうぞ。", "ro": "hai, douzo.", "zh": "好的，請。"},
+            {"jp": "すみません、そこは私の席です。", "kana": "すみません、そこは わたしの せきです。", "ro": "sumimasen, soko wa watashi no seki desu.", "zh": "不好意思，那是我的位子。"}
+          ]},
+          {"who": "me", "goal": "順便問早餐幾點開始", "answer": 0, "options": [
+            {"jp": "朝ごはんは何時からですか？", "kana": "あさごはんは なんじからですか？", "ro": "asagohan wa nanji kara desu ka?", "zh": "早餐幾點開始？"},
+            {"jp": "ワイファイのパスワードは何ですか？", "kana": "ワイファイの パスワードは なんですか？", "ro": "waifai no pasuwaado wa nan desu ka?", "zh": "Wi-Fi 密碼是什麼？"},
+            {"jp": "何番線ですか？", "kana": "なんばんせんですか？", "ro": "nanbansen desu ka?", "zh": "在第幾月台？"}
+          ]},
+          {"who": "staff", "jp": "朝食は6時半からです。", "kana": "ちょうしょくは ろくじはんからです。", "ro": "choushoku wa rokuji-han kara desu.", "zh": "早餐 6 點半開始。"},
+          {"who": "me", "goal": "道謝", "answer": 2, "options": [
+            {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待（吃完飯才說）。"},
+            {"jp": "いらっしゃいませ。", "kana": "いらっしゃいませ。", "ro": "irasshaimase.", "zh": "歡迎光臨（店員說的）。"},
+            {"jp": "ありがとうございます。", "kana": "ありがとうございます。", "ro": "arigatou gozaimasu.", "zh": "謝謝。"}
+          ]}
+        ]
+      }
+    },
+    {
+      "id": "t-kids", "icon": "🧸", "title": "帶小孩", "sub": "推車・尿布・兒童票",
+      "phrases": [
+        {"jp": "ベビーカーで入れますか？", "kana": "ベビーカーで はいれますか？", "ro": "bebiikaa de hairemasu ka?", "zh": "推嬰兒車可以進去嗎？"},
+        {"jp": "おむつ替えの場所はありますか？", "kana": "おむつがえの ばしょは ありますか？", "ro": "omutsu-gae no basho wa arimasu ka?", "zh": "有換尿布的地方嗎？"},
+        {"jp": "お湯をもらえますか？", "kana": "おゆを もらえますか？", "ro": "oyu o moraemasu ka?", "zh": "可以給我熱水嗎？"},
+        {"jp": "子どもは無料ですか？", "kana": "こどもは むりょうですか？", "ro": "kodomo wa muryou desu ka?", "zh": "小孩免費嗎？"},
+        {"jp": "この子は1歳です。", "kana": "この こは いっさいです。", "ro": "kono ko wa issai desu.", "zh": "這孩子 1 歲。"},
+        {"jp": "子ども用のメニューはありますか？", "kana": "こどもようの メニューは ありますか？", "ro": "kodomo-you no menyuu wa arimasu ka?", "zh": "有兒童餐嗎？"},
+        {"jp": "トイレはどこですか？", "kana": "トイレは どこですか？", "ro": "toire wa doko desu ka?", "zh": "廁所在哪裡？"}
+      ],
+      "roleplay": {
+        "title": "麵包超人博物館",
+        "intro": "在麵包超人博物館的售票口，你推著嬰兒車。（票價規定是模擬的，請以現場為準）",
+        "turns": [
+          {"who": "staff", "jp": "いらっしゃいませ。", "kana": "いらっしゃいませ。", "ro": "irasshaimase.", "zh": "歡迎光臨。"},
+          {"who": "me", "goal": "問小孩是不是免費", "answer": 1, "options": [
+            {"jp": "お湯をもらえますか？", "kana": "おゆを もらえますか？", "ro": "oyu o moraemasu ka?", "zh": "可以給我熱水嗎？"},
+            {"jp": "子どもは無料ですか？", "kana": "こどもは むりょうですか？", "ro": "kodomo wa muryou desu ka?", "zh": "小孩免費嗎？"},
+            {"jp": "トイレはどこですか？", "kana": "トイレは どこですか？", "ro": "toire wa doko desu ka?", "zh": "廁所在哪裡？"}
+          ]},
+          {"who": "staff", "jp": "お子様はおいくつですか？", "kana": "おこさまは おいくつですか？", "ro": "okosama wa oikutsu desu ka?", "zh": "小朋友幾歲呢？"},
+          {"who": "me", "goal": "告訴他小孩 1 歲", "answer": 0, "options": [
+            {"jp": "この子は1歳です。", "kana": "この こは いっさいです。", "ro": "kono ko wa issai desu.", "zh": "這孩子 1 歲。"},
+            {"jp": "大人2人と子ども1人です。", "kana": "おとな ふたりと こども ひとりです。", "ro": "otona futari to kodomo hitori desu.", "zh": "兩個大人、一個小孩。"},
+            {"jp": "これを2つください。", "kana": "これを ふたつ ください。", "ro": "kore o futatsu kudasai.", "zh": "這個請給我兩份。"}
+          ]},
+          {"who": "staff", "jp": "1歳以上はチケットが必要です。", "kana": "いっさい いじょうは チケットが ひつようです。", "ro": "issai ijou wa chiketto ga hitsuyou desu.", "zh": "1 歲以上需要買票。"},
+          {"who": "me", "goal": "問嬰兒車能不能推進去", "answer": 2, "options": [
+            {"jp": "子ども用のメニューはありますか？", "kana": "こどもようの メニューは ありますか？", "ro": "kodomo-you no menyuu wa arimasu ka?", "zh": "有兒童餐嗎？"},
+            {"jp": "おむつ替えの場所はありますか？", "kana": "おむつがえの ばしょは ありますか？", "ro": "omutsu-gae no basho wa arimasu ka?", "zh": "有換尿布的地方嗎？"},
+            {"jp": "ベビーカーで入れますか？", "kana": "ベビーカーで はいれますか？", "ro": "bebiikaa de hairemasu ka?", "zh": "推嬰兒車可以進去嗎？"}
+          ]},
+          {"who": "staff", "jp": "ベビーカー置き場があります。", "kana": "ベビーカーおきばが あります。", "ro": "bebiikaa okiba ga arimasu.", "zh": "有嬰兒車停放區（要停在那裡）。"},
+          {"who": "me", "goal": "小孩要換尿布，問有沒有地方", "answer": 1, "options": [
+            {"jp": "ベビーカーで入れますか？", "kana": "ベビーカーで はいれますか？", "ro": "bebiikaa de hairemasu ka?", "zh": "推嬰兒車可以進去嗎？"},
+            {"jp": "おむつ替えの場所はありますか？", "kana": "おむつがえの ばしょは ありますか？", "ro": "omutsu-gae no basho wa arimasu ka?", "zh": "有換尿布的地方嗎？"},
+            {"jp": "子どもは無料ですか？", "kana": "こどもは むりょうですか？", "ro": "kodomo wa muryou desu ka?", "zh": "小孩免費嗎？"}
+          ]},
+          {"who": "staff", "jp": "2階にございます。", "kana": "にかいに ございます。", "ro": "nikai ni gozaimasu.", "zh": "在 2 樓。"},
+          {"who": "me", "goal": "道謝", "answer": 0, "options": [
+            {"jp": "ありがとうございます。", "kana": "ありがとうございます。", "ro": "arigatou gozaimasu.", "zh": "謝謝。"},
+            {"jp": "ごちそうさまでした。", "kana": "ごちそうさまでした。", "ro": "gochisousama deshita.", "zh": "謝謝招待（吃完飯才說）。"},
+            {"jp": "すみません、そこは私の席です。", "kana": "すみません、そこは わたしの せきです。", "ro": "sumimasen, soko wa watashi no seki desu.", "zh": "不好意思，那是我的位子。"}
+          ]}
+        ]
+      }
+    },
+    {
+      "id": "t-help", "icon": "🗺️", "title": "問路與求助", "sub": "聽不懂時的救命句",
+      "phrases": [
+        {"jp": "すみません、ちょっといいですか？", "kana": "すみません、ちょっと いいですか？", "ro": "sumimasen, chotto ii desu ka?", "zh": "不好意思，可以打擾一下嗎？"},
+        {"jp": "ここに行きたいです。", "kana": "ここに いきたいです。", "ro": "koko ni ikitai desu.", "zh": "我想去這裡（指著地圖）。"},
+        {"jp": "もう一度お願いします。", "kana": "もう いちど おねがいします。", "ro": "mou ichido onegai shimasu.", "zh": "麻煩再說一次。"},
+        {"jp": "ゆっくり話してください。", "kana": "ゆっくり はなして ください。", "ro": "yukkuri hanashite kudasai.", "zh": "請說慢一點。"},
+        {"jp": "日本語が少しだけわかります。", "kana": "にほんごが すこしだけ わかります。", "ro": "nihongo ga sukoshi dake wakarimasu.", "zh": "我只懂一點點日文。"},
+        {"jp": "英語は話せますか？", "kana": "えいごは はなせますか？", "ro": "eigo wa hanasemasu ka?", "zh": "你會說英文嗎？"},
+        {"jp": "写真を撮ってもらえますか？", "kana": "しゃしんを とって もらえますか？", "ro": "shashin o totte moraemasu ka?", "zh": "可以幫我們拍照嗎？"},
+        {"jp": "わかりました。", "kana": "わかりました。", "ro": "wakarimashita.", "zh": "我懂了／知道了。"}
+      ],
+      "roleplay": {
+        "title": "在天神迷路",
+        "intro": "要去天神的麵包店，手機地圖看不懂，你決定問路人。",
+        "turns": [
+          {"who": "me", "goal": "禮貌地叫住路人", "answer": 2, "options": [
+            {"jp": "わかりました。", "kana": "わかりました。", "ro": "wakarimashita.", "zh": "我懂了。"},
+            {"jp": "写真を撮ってもらえますか？", "kana": "しゃしんを とって もらえますか？", "ro": "shashin o totte moraemasu ka?", "zh": "可以幫我們拍照嗎？"},
+            {"jp": "すみません、ちょっといいですか？", "kana": "すみません、ちょっと いいですか？", "ro": "sumimasen, chotto ii desu ka?", "zh": "不好意思，可以打擾一下嗎？"}
+          ]},
+          {"who": "staff", "jp": "はい、何でしょう？", "kana": "はい、なんでしょう？", "ro": "hai, nan deshou?", "zh": "是，什麼事呢？"},
+          {"who": "me", "goal": "指著手機地圖，說想去這裡", "answer": 0, "options": [
+            {"jp": "ここに行きたいです。", "kana": "ここに いきたいです。", "ro": "koko ni ikitai desu.", "zh": "我想去這裡。"},
+            {"jp": "英語は話せますか？", "kana": "えいごは はなせますか？", "ro": "eigo wa hanasemasu ka?", "zh": "你會說英文嗎？"},
+            {"jp": "もう一度お願いします。", "kana": "もう いちど おねがいします。", "ro": "mou ichido onegai shimasu.", "zh": "麻煩再說一次。"}
+          ]},
+          {"who": "staff", "jp": "ああ、この道をまっすぐ行って、二つ目の信号を右に曲がってください。", "kana": "ああ、この みちを まっすぐ いって、ふたつめの しんごうを みぎに まがって ください。", "ro": "aa, kono michi o massugu itte, futatsume no shingou o migi ni magatte kudasai.", "zh": "啊，這條路直走，在第二個紅綠燈右轉。"},
+          {"who": "me", "goal": "太快了聽不懂，請對方說慢一點", "answer": 1, "options": [
+            {"jp": "わかりました。", "kana": "わかりました。", "ro": "wakarimashita.", "zh": "我懂了。"},
+            {"jp": "ゆっくり話してください。", "kana": "ゆっくり はなして ください。", "ro": "yukkuri hanashite kudasai.", "zh": "請說慢一點。"},
+            {"jp": "ここに行きたいです。", "kana": "ここに いきたいです。", "ro": "koko ni ikitai desu.", "zh": "我想去這裡。"}
+          ]},
+          {"who": "staff", "jp": "まっすぐ、二つ目の信号、右です。", "kana": "まっすぐ、ふたつめの しんごう、みぎです。", "ro": "massugu, futatsume no shingou, migi desu.", "zh": "直走，第二個紅綠燈，右轉。"},
+          {"who": "me", "goal": "這次聽懂了，告訴對方", "answer": 2, "options": [
+            {"jp": "日本語が少しだけわかります。", "kana": "にほんごが すこしだけ わかります。", "ro": "nihongo ga sukoshi dake wakarimasu.", "zh": "我只懂一點點日文。"},
+            {"jp": "もう一度お願いします。", "kana": "もう いちど おねがいします。", "ro": "mou ichido onegai shimasu.", "zh": "麻煩再說一次。"},
+            {"jp": "わかりました。ありがとうございます。", "kana": "わかりました。ありがとうございます。", "ro": "wakarimashita. arigatou gozaimasu.", "zh": "我懂了，謝謝。"}
+          ]},
+          {"who": "staff", "jp": "いいえ、気をつけて。", "kana": "いいえ、きを つけて。", "ro": "iie, ki o tsukete.", "zh": "不客氣，路上小心。"}
+        ]
+      }
+    }
+  ]
+}

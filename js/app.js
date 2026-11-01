@@ -10,7 +10,9 @@ const app = document.getElementById('app');
 let content = null;
 let state = null;
 let session = null;
-const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, sway: false, toast: null };
+let travel = null; // 福岡會話題庫（data/travel.json）
+let rp = null;     // 情境模擬進行中的狀態
+const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, sway: false, toast: null, scene: null, show: null };
 
 // ---------- 工具 ----------
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -50,10 +52,12 @@ async function boot() {
     app.innerHTML = `<div class="fatal">題庫載入失敗。請確認網路後重新整理頁面。</div>`;
     return;
   }
+  try { travel = await (await fetch('data/travel.json', { cache: 'no-cache' })).json(); } catch (e) { travel = null; }
   state = (await loadState()) || newState();
   const base = newState();
   state.settings = { ...base.settings, ...state.settings };
   state.profile = { ...base.profile, ...state.profile };
+  state.talk = { done: {}, ...state.talk };
   if (!state.garden) {
     // 舊存檔：吉祥物的經驗轉給櫻花樹
     state.garden = { ...base.garden, plants: { sakura: { exp: state.companion?.exp || 0 } } };
@@ -72,17 +76,19 @@ function render() {
   if (ui.overlay === 'onboard') html = viewOnboard();
   else if (ui.overlay === 'session') html = viewSession();
   else if (ui.overlay === 'result') html = viewResult();
+  else if (ui.overlay === 'rp') html = viewRoleplay();
   else {
     html = `<main class="page page-${ui.tab}">${
-      ui.tab === 'home' ? viewHome() : ui.tab === 'book' ? viewBook() : ui.tab === 'garden' ? viewGarden() : viewSettings()
-    }</main>${viewNav()}${ui.sheet ? viewSheet() : ''}`;
+      ui.tab === 'home' ? viewHome() : ui.tab === 'book' ? viewBook() : ui.tab === 'talk' ? viewTalk()
+        : ui.tab === 'garden' ? viewGarden() : viewSettings()
+    }</main>${viewNav()}${ui.sheet ? viewSheet() : ''}${ui.show ? viewShow() : ''}`;
   }
   if (ui.toast) html += `<div class="toast" role="status">${esc(ui.toast)}</div>`;
   app.innerHTML = html;
 }
 
 function viewNav() {
-  const tabs = [['home', '旅程'], ['book', '手帳'], ['garden', '植物'], ['settings', '設定']];
+  const tabs = [['home', '旅程'], ['book', '手帳'], ['talk', '會話'], ['garden', '植物'], ['settings', '設定']];
   return `<nav class="tabbar">${tabs.map(([k, n]) =>
     `<button data-action="tab" data-tab="${k}" class="${ui.tab === k ? 'on' : ''}" aria-current="${ui.tab === k}"><i class="ic ic-${k}"></i>${n}</button>`
   ).join('')}</nav>`;
@@ -674,6 +680,165 @@ async function importData(file) {
   }
 }
 
+
+// ---------- 福岡會話 ----------
+const sceneById = id => travel?.scenes.find(s => s.id === id);
+const kanaLine = l => (l.kana && l.kana.replace(/\s/g, '') !== l.jp.replace(/\s/g, '') ? `<span class="kana">${esc(l.kana)}</span>` : '');
+
+function viewTalk() {
+  if (!travel) return `<header class="top"><h1>福岡會話</h1></header><p class="hint-text">會話題庫載入失敗，請連上網路後重新整理。</p>`;
+  if (ui.scene) return viewScene(sceneById(ui.scene));
+  const done = travel.scenes.filter(s => state.talk.done[s.id]).length;
+  return `
+    <header class="top"><h1>福岡會話</h1><div class="coins"><i class="ic ic-coin"></i>${state.profile.coins}</div></header>
+    <p class="hint-text">旅途上用得到的句子，每個場景都有一段情境模擬。出發前每天練一個場景就好。</p>
+    <div class="bar big"><i style="width:${Math.round(done / travel.scenes.length * 100)}%"></i></div>
+    <p class="hint-text">情境模擬完成 ${done}／${travel.scenes.length}</p>
+    <div class="scene-grid">${travel.scenes.map(s => `
+      <button class="scene-card ${state.talk.done[s.id] ? 'done' : ''}" data-action="talk-scene" data-id="${s.id}">
+        <span class="emoji" aria-hidden="true">${s.icon}</span><b>${esc(s.title)}</b><small>${esc(s.sub)}</small>
+        ${state.talk.done[s.id] ? '<span class="pill on">完成</span>' : `<span class="cnt">${s.phrases.length} 句</span>`}
+      </button>`).join('')}</div>
+    <p class="hint-text">${esc(travel.note)}</p>`;
+}
+
+function viewScene(sc) {
+  return `
+    <header class="top"><button class="back" data-action="talk-back" aria-label="回到場景列表">‹ 場景</button></header>
+    <h1 class="scene-h"><span aria-hidden="true">${sc.icon}</span>${esc(sc.title)}</h1>
+    <button class="btn primary wide" data-action="rp-start" data-id="${sc.id}">情境模擬：${esc(sc.roleplay.title)}
+      <small>${state.talk.done[sc.id] ? '已完成，可以再練一次' : `${sc.roleplay.turns.filter(t => t.who === 'me').length} 次輪到你回答`}</small></button>
+    <h2>常用句</h2>
+    <p class="hint-text">點句子聽發音；點「放大」可以直接拿手機給店員看。</p>
+    <div class="talk-list">${sc.phrases.map((p, i) => `
+      <div class="talk-row">
+        <button class="talk-main" data-action="say" data-text="${esc(p.jp)}">
+          <span class="jp">${esc(p.jp)}</span>${kanaLine(p)}${ro(p.ro)}<span class="zh">${esc(p.zh)}</span></button>
+        <div class="talk-btns">
+          <button class="mini" data-action="say-slow" data-text="${esc(p.jp)}">慢速</button>
+          <button class="mini" data-action="talk-show" data-id="${sc.id}" data-i="${i}">放大</button>
+        </div>
+      </div>`).join('')}</div>`;
+}
+
+function viewShow() {
+  const p = sceneById(ui.show.sid)?.phrases[ui.show.i];
+  if (!p) return '';
+  return `<div class="show" role="dialog" aria-label="給店員看">
+    <button class="x" data-action="close-show" aria-label="關閉">×</button>
+    <button class="show-jp jp" data-action="say" data-text="${esc(p.jp)}">${esc(p.jp)}</button>
+    ${p.kana ? `<p class="show-kana">${esc(p.kana)}</p>` : ''}
+    <p class="show-zh">${esc(p.zh)}</p>
+    <p class="hint-text center">點日文可以播放發音</p>
+  </div>`;
+}
+
+function rpBubble(t, cls = '') {
+  return `<div class="rp-msg ${t.who === 'me' ? 'me' : 'them'} ${cls}">
+    <small>${t.who === 'me' ? '你' : '對方'}</small>
+    <button class="rp-bubble" data-action="say" data-text="${esc(t.jp)}">
+      <span class="jp">${esc(t.jp)}</span>${kanaLine(t)}${ro(t.ro)}<span class="zh">${esc(t.zh)}</span></button>
+  </div>`;
+}
+
+function viewRoleplay() {
+  const sc = sceneById(rp.sid);
+  const turns = sc.roleplay.turns;
+  const finished = rp.idx >= turns.length;
+  const pct = Math.round((Math.min(rp.idx, turns.length) / turns.length) * 100);
+  const log = turns.slice(0, Math.min(rp.idx + 1, turns.length)).map((t, k) => {
+    if (t.who === 'staff') return rpBubble(t, k === rp.idx ? 'now' : '');
+    if (k < rp.idx) return rpBubble({ who: 'me', ...t.options[t.answer] });
+    return '';
+  }).join('');
+  let foot = '';
+  if (finished) {
+    foot = `<div class="rp-end">
+      <p class="mark">○</p><h2>對話完成！</h2>
+      <p>${rp.wrong ? `選錯 ${rp.wrong} 次，再練一次會更熟。` : '全部一次答對，太厲害了！'}</p>
+      ${rp.reward ? `<p class="reward"><i class="ic ic-coin"></i>+${rp.reward}</p>` : ''}
+      <button class="btn primary wide" data-action="rp-again">再練一次</button>
+      <button class="btn ghost wide" data-action="rp-exit">回到場景</button></div>`;
+  } else if (turns[rp.idx].who === 'staff') {
+    foot = `<div class="rp-foot"><button class="btn primary wide" data-action="rp-next">繼續</button></div>`;
+  } else {
+    const t = turns[rp.idx];
+    foot = `<div class="rp-foot">
+      <p class="rp-goal">🎯 ${esc(t.goal)}</p>
+      ${rp.tip ? `<p class="rp-tip">${esc(rp.tip)}</p>` : ''}
+      <div class="opts">${t.options.map((o, k) => `
+        <button class="opt rp-opt ${rp.picked.includes(k) ? 'wrong' : ''}" data-action="rp-pick" data-i="${k}" ${rp.picked.includes(k) ? 'disabled' : ''}>
+          <span class="jp">${esc(o.jp)}</span>${kanaLine(o)}${ro(o.ro)}</button>`).join('')}</div>
+    </div>`;
+  }
+  return `<section class="session rp">
+    <header class="session-top">
+      <button class="x" data-action="rp-exit" aria-label="離開">×</button>
+      <div class="progress"><i style="width:${pct}%"></i></div>
+    </header>
+    <h2 class="rp-title">${sc.icon} ${esc(sc.roleplay.title)}</h2>
+    <p class="hint-text center">${esc(sc.roleplay.intro)}</p>
+    <div class="rp-log">${log}</div>
+    ${foot}
+  </section>`;
+}
+
+function rpEnterTurn() {
+  const t = sceneById(rp.sid).roleplay.turns[rp.idx];
+  rp.picked = [];
+  rp.tip = '';
+  render();
+  window.scrollTo(0, document.body.scrollHeight);
+  if (t && t.who === 'staff' && state.settings.autoplay) say(t.jp);
+}
+
+function rpStart(sid) {
+  rp = { sid, idx: 0, wrong: 0, picked: [], tip: '', reward: 0 };
+  ui.overlay = 'rp';
+  rpEnterTurn();
+}
+
+function rpPick(k) {
+  const sc = sceneById(rp.sid);
+  const t = sc.roleplay.turns[rp.idx];
+  if (!t || t.who !== 'me' || rp.picked.includes(k)) return;
+  if (k !== t.answer) {
+    rp.picked.push(k);
+    rp.wrong++;
+    rp.tip = `這句是「${t.options[k].zh}」，再想想看。`;
+    sfx.wrong();
+    say(t.options[k].jp);
+    render();
+    return;
+  }
+  sfx.correct();
+  say(t.options[k].jp);
+  const myLen = [...t.options[k].jp].length;
+  rp.idx++;
+  if (rp.idx >= sc.roleplay.turns.length) return rpFinish();
+  // 先讓自己那句唸完，再換對方說
+  const next = sc.roleplay.turns[rp.idx];
+  rp.picked = [];
+  rp.tip = '';
+  render();
+  window.scrollTo(0, document.body.scrollHeight);
+  if (next.who === 'staff' && state.settings.autoplay) {
+    const myIdx = rp.idx;
+    setTimeout(() => { if (rp && rp.idx === myIdx && ui.overlay === 'rp') say(next.jp); }, 700 + myLen * 180);
+  }
+}
+
+function rpFinish() {
+  const first = !state.talk.done[rp.sid];
+  rp.reward = first ? 30 : 5;
+  state.talk.done[rp.sid] = true;
+  state.profile.coins += rp.reward;
+  save();
+  sfx.fanfare();
+  render();
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
 // ---------- 事件 ----------
 app.addEventListener('click', e => {
   const el = e.target.closest('[data-action]');
@@ -681,7 +846,16 @@ app.addEventListener('click', e => {
   const a = el.dataset.action;
   const i = Number(el.dataset.i);
   switch (a) {
-    case 'tab': ui.tab = el.dataset.tab; ui.sheet = null; ui.bubble = null; render(); window.scrollTo(0, 0); break;
+    case 'tab': ui.tab = el.dataset.tab; ui.sheet = null; ui.bubble = null; ui.scene = null; ui.show = null; render(); window.scrollTo(0, 0); break;
+    case 'talk-scene': ui.scene = el.dataset.id; render(); window.scrollTo(0, 0); break;
+    case 'talk-back': ui.scene = null; render(); window.scrollTo(0, 0); break;
+    case 'talk-show': ui.show = { sid: el.dataset.id, i }; render(); say(sceneById(el.dataset.id).phrases[i].jp); break;
+    case 'close-show': ui.show = null; render(); break;
+    case 'rp-start': rpStart(el.dataset.id); break;
+    case 'rp-next': rp.idx++; rp.idx >= sceneById(rp.sid).roleplay.turns.length ? rpFinish() : rpEnterTurn(); break;
+    case 'rp-pick': rpPick(i); break;
+    case 'rp-again': rpStart(rp.sid); break;
+    case 'rp-exit': rp = null; ui.overlay = null; render(); window.scrollTo(0, 0); break;
     case 'onboard-go': state.onboarded = true; save(); startSession(buildLevel(state, content, 0)); break;
     case 'play': startSession(buildLevel(state, content, i)); break;
     case 'review': startSession(buildReview(state, content)); break;
