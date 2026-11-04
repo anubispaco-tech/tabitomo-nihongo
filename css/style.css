@@ -395,3 +395,31 @@ h2 { font-size: 17px; margin: 28px 0 10px; }
 .rp-end h2 { margin: 0; }
 .rp-end .reward { font-size: 20px; font-weight: 700; color: var(--ai); display: flex; justify-content: center; align-items: center; gap: 4px; }
 .rp-end .reward .ic { color: var(--yamabuki); }
+
+/* ---------- 旅伴吉祥物 ---------- */
+.mascot { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.mascot-btn { display: block; width: 120px; height: 120px; flex: none; border-radius: 24px; }
+.home-duo, .banner-duo, .result-duo { display: flex; align-items: flex-end; justify-content: center; gap: 4px; }
+.plant-btn { display: block; }
+.home-plant.with-mascot .plant-md { width: 150px; height: 150px; }
+.home-plant .mascot-btn { width: 130px; height: 130px; margin-left: -10px; }
+.banner-duo .mascot-btn { width: 110px; height: 110px; }
+.banner .bubble { margin-top: 6px; }
+.result-duo .plant-hero { width: 170px; height: 170px; }
+.result-duo .mascot-btn { width: 130px; height: 130px; margin-left: -12px; }
+.result > .bubble { margin: -4px 0 12px; }
+.hop .mascot { animation: hop .6s cubic-bezier(.3,1.6,.5,1); transform-origin: 50% 100%; }
+@keyframes hop { 0% { transform: translateY(0) scale(1); } 30% { transform: translateY(-14px) scale(1.04, .97); } 60% { transform: translateY(0) scale(1.03, .95); } 100% { transform: none; } }
+.mascot.pop { animation: pop .45s cubic-bezier(.2,1.5,.4,1) both; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+.fb-mascot { flex: none; width: 64px; height: 64px; margin: -18px 0 -6px; }
+.mark.small { width: 28px; height: 28px; }
+.mascot-picks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 6px 0 4px; }
+.mascot-pick { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border-radius: var(--r);
+  background: var(--washi); border: 2px solid transparent; min-height: 44px; }
+.mascot-pick.on { border-color: var(--take); background: var(--take-soft); }
+.mascot-pick img { width: 72px; height: 72px; object-fit: contain; }
+.mascot-pick .none { width: 72px; height: 72px; display: grid; place-items: center; font-size: 28px; color: var(--ai-3); }
+.mascot-pick b { font-family: var(--jp); font-size: 14px; }
+.mascot-pick small { font-size: 12px; color: var(--ai-2); }
+@media (prefers-reduced-motion: reduce) { .hop .mascot, .mascot.pop { animation: none; } }

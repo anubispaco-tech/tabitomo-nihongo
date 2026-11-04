@@ -1,5 +1,5 @@
 // 離線快取：自家檔案網路優先（一推送就拿到新版，斷網時用快取），字型快取優先
-const VERSION = 'tabitomo-v0.4.0';
+const VERSION = 'tabitomo-v0.5.0';
 const AUDIO = 'tabitomo-audio'; // 音檔檔名是內容雜湊，不會變，獨立快取、換版不清
 const SHELL = [
   './',
@@ -10,12 +10,14 @@ const SHELL = [
   'js/store.js',
   'js/audio.js',
   'js/plants.js',
+  'js/mascot.js',
   'data/prologue.json',
   'data/travel.json',
   'manifest.webmanifest',
   'icons/icon.svg',
   'icons/icon-180.png',
   'icons/icon-192.png',
+  ...['dragon', 'cat'].flatMap(id => ['idle', 'cheer', 'encourage', 'think', 'alert', 'sleep'].map(m => `img/mascot/${id}_${m}.webp`)),
 ];
 
 self.addEventListener('install', e => {
@@ -37,7 +39,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  if (url.origin === location.origin && /\/audio\/[ns]\/[0-9a-f]+\.mp3$/.test(url.pathname)) {
+  if (url.origin === location.origin && /\/audio\/[nsm]\/[0-9a-f]+\.mp3$/.test(url.pathname)) {
     e.respondWith(
       caches.open(AUDIO).then(c => c.match(req).then(hit => hit || fetch(req).then(res => {
         if (res.ok) c.put(req, res.clone());
@@ -77,6 +79,9 @@ async function precacheAudio() {
     const want = new Set();
     for (const h of new Set(Object.values(m.files || {}))) {
       for (const d of ['n', 's']) want.add(new URL(`audio/${d}/${h}.mp3`, self.registration.scope).href);
+    }
+    for (const v of Object.values(m.mascot || {})) {
+      for (const h of new Set(Object.values(v.files || {}))) want.add(new URL(`audio/m/${h}.mp3`, self.registration.scope).href);
     }
     // 刪掉舊聲音的檔案
     for (const req of await c.keys()) if (!want.has(req.url)) await c.delete(req);
