@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, unlink
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ENGINE = process.env.VOICEVOX_URL || 'http://127.0.0.1:50021';
@@ -27,7 +27,7 @@ const PARAMS_VERSION = 2; // 改了 PROFILES 或後製就 +1，讓全部重新�
 const EQ = 'highpass=f=80,equalizer=f=3000:t=q:w=1.2:g=4';
 const PEAK_DB = -1;
 
-const SAMPLE_CANDIDATES = ['冥鳴ひまり', '四国めたん', '春日部つむぎ', '九州そら', 'WhiteCUL', 'No.7', '玄野武宏', '青山龍星'];
+const SAMPLE_CANDIDATES = ['冥鳴ひまり', '四国めたん', '春日部つむぎ', '九州そら', 'WhiteCUL', 'No.7', '玄野武宏', '青山龍星', '白上虎太郎', '猫使ビィ', '猫使アル'];
 const SAMPLE_TEXT = 'あ、い、う、え、お。こんにちは。これ、ください。';
 
 const args = process.argv.slice(2);
@@ -157,6 +157,29 @@ async function main() {
     for (const f of readdirSync(d)) if (!keep.has(f)) { unlinkSync(join(d, f)); removed++; }
   }
 
+  // 吉祥物：每隻用自己的聲音唸自己的台詞，放在 audio/m
+  const mascot = {};
+  const keepM = new Set();
+  let madeM = 0;
+  const { MASCOTS } = await import(pathToFileURL(join(ROOT, 'js', 'mascot.js')).href);
+  for (const m of MASCOTS) {
+    const msid = await styleId(m.voice, m.style);
+    if (!msid) { console.log(`略過吉祥物「${m.id}」：引擎裡沒有聲音「${m.voice}」`); continue; }
+    const mf = {};
+    for (const text of new Set(Object.values(m.lines).flat().map(l => l.jp))) {
+      const h = createHash('sha1').update(`${PARAMS_VERSION}|m|${m.voice}|${msid.style}|${text}`).digest('hex').slice(0, 12);
+      mf[text] = h;
+      keepM.add(`${h}.mp3`);
+      const file = join(OUT, 'm', `${h}.mp3`);
+      if (existsSync(file)) continue;
+      toMp3(await synth(text, msid.id, PROFILES.n), file);
+      madeM++;
+    }
+    mascot[m.id] = { speaker: m.voice, style: msid.style, credit: `VOICEVOX:${m.voice}`, files: mf };
+  }
+  const mdir = join(OUT, 'm');
+  if (existsSync(mdir)) for (const f of readdirSync(mdir)) if (!keepM.has(f)) { unlinkSync(join(mdir, f)); removed++; }
+
   const manifest = {
     engine: 'VOICEVOX',
     speaker, style: sid.style,
@@ -164,10 +187,11 @@ async function main() {
     params: PARAMS_VERSION,
     count: texts.length,
     files: Object.fromEntries(Object.entries(files).sort(([a], [b]) => a.localeCompare(b, 'ja'))),
+    mascot,
   };
   const next = JSON.stringify(manifest, null, 1) + '\n';
   if (!old || JSON.stringify(old, null, 1) + '\n' !== next) writeFileSync(MANIFEST, next);
-  console.log(`聲音：${speaker}（${sid.style}）｜字串 ${texts.length} 句｜新產生 ${made} 檔｜刪除 ${removed} 檔`);
+  console.log(`聲音：${speaker}（${sid.style}）｜字串 ${texts.length} 句｜新產生 ${made} 檔｜吉祥物新產生 ${madeM} 檔｜刪除 ${removed} 檔`);
 }
 
 (samplesMode ? samples() : main()).catch(e => { console.error(e.message || e); process.exit(1); });

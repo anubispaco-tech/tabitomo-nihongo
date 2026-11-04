@@ -69,6 +69,31 @@ export const speech = {
   hasJapanese: () => !!jaVoice,
   hasClips: () => !!clips,
   credit: () => clips?.credit || '',
+  // 吉祥物的聲音（manifest.mascot[id]）；還沒產生就回空字串
+  mascotCredit: id => clips?.mascot?.[id]?.credit || '',
+  // 吉祥物台詞：有角色音檔就用角色聲音，沒有就退回一般發音
+  mascot(id, text) {
+    if (!text) return;
+    if (clipsSettled && !clips?.mascot?.[id]?.files?.[text]) { this.speak(text); return; }
+    const token = ++playToken;
+    stopAll();
+    const c = audioCtx();
+    const run = async () => {
+      if (!clips) await clipsReady;
+      const h = clips?.mascot?.[id]?.files?.[text];
+      if (!h || !c) { if (token === playToken) this.speak(text); return; }
+      try {
+        const buf = await loadBuffer(c, `audio/m/${h}.mp3`);
+        if (token !== playToken) return;
+        const src = c.createBufferSource();
+        src.buffer = buf;
+        src.connect(c.destination);
+        src.start();
+        current = src;
+      } catch (e) { if (token === playToken) this.speak(text); }
+    };
+    run();
+  },
   speak(text, { slow = false } = {}) {
     if (!text) return;
     const token = ++playToken;

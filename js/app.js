@@ -1,6 +1,7 @@
 import { loadState, saveState, addLogs, allLogs, clearAll, requestPersist } from './store.js';
 import { speech, sfx } from './audio.js';
 import { plantSVG, PLANTS, plantById } from './plants.js';
+import { MASCOTS, mascotById, mascotImg, mascotLine, homeMood } from './mascot.js';
 import {
   today, newState, applyResult, itemStatus, progressCounts, buildLevel, buildReview, reviewLeftToday,
   makeQuestion, growthLevel, growthStage, STAGE_LV, CARE, LINES, CHEERS, COMFORT, touchStreak, streakAlive,
@@ -12,7 +13,7 @@ let state = null;
 let session = null;
 let travel = null; // 福岡會話題庫（data/travel.json）
 let rp = null;     // 情境模擬進行中的狀態
-const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, sway: false, toast: null, scene: null, show: null };
+const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, sway: false, toast: null, scene: null, show: null, mood: null, hop: false };
 
 // ---------- 工具 ----------
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -38,6 +39,37 @@ function plantInfo(id = state.garden.active) {
 const learnedCount = () => Object.keys(state.items).length;
 function drawPlant(info = plantInfo()) {
   return plantSVG(info.id, info.stage, { blooms: learnedCount() });
+}
+
+// ---------- 吉祥物 ----------
+const mascot = () => mascotById(state.settings.mascot);
+function mascotHTML(mood, cls = '') {
+  const m = mascot();
+  if (!m) return '';
+  return `<img class="mascot ${cls}" src="${mascotImg(m.id, mood)}" alt="${esc(m.zh)}${esc(m.name)}" width="120" height="120" decoding="async">`;
+}
+function mascotSay(l) {
+  const m = mascot();
+  if (!m || !l) return;
+  speech.mascot(m.id, l.jp);
+}
+function hopOnce() {
+  ui.hop = true;
+  clearTimeout(hopOnce.t);
+  hopOnce.t = setTimeout(() => { ui.hop = false; render(); }, 700);
+}
+function mascotTap() {
+  const m = mascot();
+  if (!m) return;
+  const base = homeMood(state.profile.lastPlay === today());
+  // 還沒學的日子：提醒和閒聊輪流；其他時候照當下心情
+  const mood = base === 'alert' ? (ui.mood === 'alert' ? 'idle' : 'alert') : base;
+  const l = mascotLine(m.id, mood, ui.bubble);
+  ui.mood = mood;
+  ui.bubble = l;
+  hopOnce();
+  render();
+  mascotSay(l);
 }
 
 function line(l, cls = '') {
@@ -116,6 +148,9 @@ function viewHome() {
   const streak = streakAlive(state);
   const nextIdx = content.levels.findIndex((_, i) => stationState(i) === 'open');
   const dueN = reviewLeftToday(state, content);
+  const m = mascot();
+  const mood = ui.mood || homeMood(state.profile.lastPlay === today());
+  if (m && !ui.bubble) ui.bubble = mascotLine(m.id, mood);
   const bubble = ui.bubble || (streak ? LINES[1] : LINES[0]);
 
   const stations = content.levels.map((lv, i) => {
@@ -134,9 +169,12 @@ function viewHome() {
       <div class="streak ${streak ? 'on' : ''}"><i class="ic ic-fire"></i><b>${streak}</b> 天連續</div>
       <div class="coins"><i class="ic ic-coin"></i>${state.profile.coins}</div>
     </header>
-    <section class="home-plant" data-action="plant-tap">
+    <section class="home-plant ${m ? 'with-mascot' : ''}">
       <div class="bubble">${line(bubble)}</div>
-      <div class="plant-md ${ui.sway ? 'sway' : ''}">${drawPlant(pi)}</div>
+      <div class="home-duo">
+        <button class="plant-md plant-btn ${ui.sway ? 'sway' : ''}" data-action="plant-tap" aria-label="${esc(pi.def.zh)}">${drawPlant(pi)}</button>
+        ${m ? `<button class="mascot-btn ${ui.hop ? 'hop' : ''}" data-action="mascot-tap" aria-label="和${esc(m.zh)}${esc(m.name)}說話">${mascotHTML(mood)}</button>` : ''}
+      </div>
       <div class="plant-meta"><b>${esc(pi.def.zh)}</b>・${esc(pi.def.stages[pi.stage - 1])}　Lv.${pi.lv}
         <div class="bar"><i style="width:${Math.round(pi.pct * 100)}%"></i></div></div>
     </section>
@@ -251,8 +289,20 @@ function viewSettings() {
       : speech.hasJapanese()
         ? '已找到日文語音。'
         : '還沒找到日文語音。iPhone 可到「設定 › 輔助使用 › 朗讀內容 › 聲音 › 日文」下載語音。';
+  const cur = mascot();
+  const pickBtn = (id, label, sub, img) => `<button class="mascot-pick ${st.mascot === id ? 'on' : ''}" data-action="mascot-set" data-id="${id}" aria-pressed="${st.mascot === id}">
+      ${img ? `<img src="${img}" alt="" width="72" height="72">` : '<span class="none" aria-hidden="true">—</span>'}<b>${label}</b><small>${sub}</small></button>`;
   return `
     <header class="top"><h1>設定</h1></header>
+    <h2>旅伴</h2>
+    <section class="settings">
+      <div class="mascot-picks">
+        ${MASCOTS.map(mm => pickBtn(mm.id, `${mm.zh}・${mm.name}`, mm.ro, mascotImg(mm.id, 'idle'))).join('')}
+        ${pickBtn('none', '不顯示', '只看植物', '')}
+      </div>
+      ${cur ? `<p class="hint-text">${esc(cur.note)}。<button class="link" data-action="mascot-test">試聽</button></p>` : ''}
+    </section>
+    <h2>學習</h2>
     <section class="settings">
       ${toggle('romaji', '顯示羅馬拼音', '日文下方顯示拼音。考試題目本身不會先顯示。')}
       ${toggle('slow', '慢速發音', '聽不清楚時打開。')}
@@ -272,6 +322,8 @@ function viewSettings() {
       <p>旅伴日語 Tabitomo・序章原型 v0.1</p>
       <p class="hint-text">序章的假名、例字與會話句由 Claude 以日語教師角度編寫並審稿；字源與注音近似音僅供記憶參考，發音以語音為準。第 1 章起單字將改用 JMdict、例句使用 Tatoeba（皆依授權標示出處）。</p>
       ${speech.hasClips() ? `<p class="hint-text">語音：${esc(speech.credit())}（由 VOICEVOX 合成）</p>` : ''}
+      ${MASCOTS.map(mm => speech.mascotCredit(mm.id) ? `<p class="hint-text">${esc(mm.zh)}${esc(mm.name)}的聲音：${esc(speech.mascotCredit(mm.id))}</p>` : '').join('')}
+      <p class="hint-text">旅伴角色插畫以 AI 生成（Google Gemini）後調整。</p>
     </section>`;
 }
 
@@ -342,8 +394,11 @@ function viewSession() {
 }
 
 function viewBanner(st) {
+  const m = mascot();
+  const l = m ? (st.mascotLine ||= mascotLine(m.id, 'think')) : null;
   return `<div class="banner">
-    <div class="plant-sm">${drawPlant()}</div>
+    <div class="banner-duo"><div class="plant-sm">${drawPlant()}</div>${m ? `<button class="mascot-btn" data-action="mascot-say" data-mood="think">${mascotHTML('think')}</button>` : ''}</div>
+    ${l ? `<div class="bubble">${line(l)}</div>` : ''}
     <h2>${esc(st.text)}</h2><p>${esc(st.sub)}</p>
   </div>
   <div class="foot"><button class="btn primary wide" data-action="next">開始</button></div>`;
@@ -394,8 +449,9 @@ function answerDetail(it) {
 
 function feedback(ok, detail, retryNote = true) {
   const l = ok ? pick(CHEERS) : COMFORT;
+  const mk = mascot();
   return `<div class="feedback ${ok ? 'ok' : 'ng'}">
-    <div class="fb-head"><div class="mark" aria-hidden="true">${ok
+    <div class="fb-head">${mk ? `<div class="fb-mascot" aria-hidden="true">${mascotHTML(ok ? 'cheer' : 'encourage', 'pop')}</div>` : ''}<div class="mark ${mk ? 'small' : ''}" aria-hidden="true">${ok
       ? '<svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="5"/></svg>'
       : '<svg viewBox="0 0 40 40"><path d="M9 9 31 31M31 9 9 31" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>'}</div>
       <div>${line(l)}${ok || !retryNote ? '' : '<p class="zh small">這題等一下會再出現一次。</p>'}</div></div>
@@ -559,13 +615,17 @@ function finishSession() {
   state.garden.plants[state.garden.active].exp += exp;
   const after = plantInfo();
 
-  session.result = { acc, coins, exp, newly, usedFreeze, firstToday, lvUp: after.lv > before.lv, stageUp: after.stage > before.stage, after };
+  const mood = acc >= 70 ? 'cheer' : 'encourage';
+  const ml = mascot() ? mascotLine(mascot().id, mood) : null;
+  session.result = { acc, coins, exp, newly, usedFreeze, firstToday, lvUp: after.lv > before.lv, stageUp: after.stage > before.stage, after, mood, line: ml };
   save();
   addLogs(session.logs);
   ui.overlay = 'result';
   ui.bubble = null;
+  ui.mood = null;
   render();
   sfx.fanfare();
+  if (ml && state.settings.autoplay) setTimeout(() => { if (ui.overlay === 'result') mascotSay(ml); }, 900);
 }
 
 function viewResult() {
@@ -575,9 +635,12 @@ function viewResult() {
   const nextIdx = isLevel ? session.levelIdx + 1 : -1;
   const hasNext = isLevel && nextIdx < content.levels.length;
   const newStamps = r.newly.map(byId).filter(Boolean);
+  const m = mascot();
   return `<section class="result">
     <h1>${isLevel ? `「${esc(session.level.title)}」完成！` : '今日複習完成！'}</h1>
-    <div class="plant-hero grow">${drawPlant(ci)}</div>
+    <div class="result-duo"><div class="plant-hero grow">${drawPlant(ci)}</div>
+      ${m ? `<button class="mascot-btn" data-action="mascot-say" data-mood="${r.mood}">${mascotHTML(r.mood, 'pop')}</button>` : ''}</div>
+    ${m && r.line ? `<div class="bubble">${line(r.line)}</div>` : ''}
     ${r.stageUp ? `<div class="levelup">${line({ jp: 'みて！おおきく なった！', ro: 'mite! ookiku natta!', zh: '你看！長大了！' })}<p>${esc(ci.def.zh)}升到 Lv.${ci.lv}，進入「${esc(ci.def.stages[ci.stage - 1])}」</p></div>`
       : r.lvUp ? `<div class="levelup"><p>${esc(ci.def.zh)}升到 Lv.${ci.lv}！</p></div>` : ''}
     <div class="stats">
@@ -846,7 +909,7 @@ app.addEventListener('click', e => {
   const a = el.dataset.action;
   const i = Number(el.dataset.i);
   switch (a) {
-    case 'tab': ui.tab = el.dataset.tab; ui.sheet = null; ui.bubble = null; ui.scene = null; ui.show = null; render(); window.scrollTo(0, 0); break;
+    case 'tab': ui.tab = el.dataset.tab; ui.sheet = null; ui.bubble = null; ui.mood = null; ui.scene = null; ui.show = null; render(); window.scrollTo(0, 0); break;
     case 'talk-scene': ui.scene = el.dataset.id; render(); window.scrollTo(0, 0); break;
     case 'talk-back': ui.scene = null; render(); window.scrollTo(0, 0); break;
     case 'talk-show': ui.show = { sid: el.dataset.id, i }; render(); say(sceneById(el.dataset.id).phrases[i].jp); break;
@@ -860,7 +923,7 @@ app.addEventListener('click', e => {
     case 'play': startSession(buildLevel(state, content, i)); break;
     case 'review': startSession(buildReview(state, content)); break;
     case 'locked': toast('先完成前一站才能前往'); break;
-    case 'home': session = null; ui.overlay = null; ui.tab = 'home'; render(); window.scrollTo(0, 0); break;
+    case 'home': session = null; ui.overlay = null; ui.tab = 'home'; ui.bubble = null; ui.mood = null; render(); window.scrollTo(0, 0); break;
     case 'quit':
       if (confirm('現在離開，這一關的進度不會保存。確定離開嗎？')) { window.speechSynthesis?.cancel(); session = null; ui.overlay = null; render(); }
       break;
@@ -881,6 +944,21 @@ app.addEventListener('click', e => {
     case 'sheet': ui.sheet = el.dataset.id; render(); if (state.items[ui.sheet] && state.settings.autoplay) say(byId(ui.sheet).jp); break;
     case 'close-sheet': ui.sheet = null; render(); break;
     case 'plant-tap': plantTap(); break;
+    case 'mascot-tap': mascotTap(); break;
+    case 'mascot-say': {
+      const mm = mascot();
+      if (!mm) break;
+      const l = el.dataset.mood === 'think' ? curStep()?.mascotLine : session?.result?.line;
+      mascotSay(l || mascotLine(mm.id, el.dataset.mood));
+      break;
+    }
+    case 'mascot-set':
+      state.settings.mascot = el.dataset.id;
+      ui.bubble = null; ui.mood = null;
+      save(); render();
+      if (mascot()) mascotSay(mascotLine(mascot().id, 'idle'));
+      break;
+    case 'mascot-test': if (mascot()) mascotSay(mascotLine(mascot().id, 'idle')); break;
     case 'care': care(el.dataset.id); break;
     case 'plant-buy': buyPlant(el.dataset.id); break;
     case 'plant-use': usePlant(el.dataset.id); break;

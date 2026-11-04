@@ -23,7 +23,7 @@ export function newState() {
     v: 1,
     createdAt: Date.now(),
     onboarded: false,
-    settings: { romaji: true, slow: false, autoplay: true, sound: true },
+    settings: { romaji: true, slow: false, autoplay: true, sound: true, mascot: 'cat' },
     profile: { coins: 0, streak: 0, bestStreak: 0, lastPlay: null, freezes: 1, freezeEarnedAt: 0, reviewDay: null, reviewCount: 0 },
     garden: { active: 'sakura', plants: { sakura: { exp: 0 } }, cared: 0 },
     levels: {},
