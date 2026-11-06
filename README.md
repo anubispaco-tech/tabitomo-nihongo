@@ -28,6 +28,12 @@
 
 題庫在 `data/travel.json`。
 
+## 單字快閃（v0.6.0）
+
+首頁「單字快閃・5 題」：看中文＋圖，10 秒內從 3 個**發音相近**的選項選出日文（例：ねこ／ねぎ／ねつ）。答完顯示含假名注音的例句、羅馬拼音與中文，目標字以朱色標出，另兩個選項的意思也一起列出。單字納入 SRS，答錯或超時隔天再出。
+
+題庫在 `data/words.json`（33 字，旅遊常用名詞）。
+
 ## 結構
 
 ```
@@ -39,6 +45,7 @@ js/store.js           IndexedDB 存檔（失敗時退回 localStorage）
 js/audio.js           發音（VOICEVOX 預錄音檔優先，退回瀏覽器 TTS）＋合成音效
 js/plants.js          植物 SVG（櫻花樹、龜背芋、鹿角蕨，各 4 階段）
 data/prologue.json    序章題庫
+data/words.json       單字快閃題庫
 sw.js                 離線快取（含音檔預載）
 audio/                VOICEVOX 產生的音檔（n＝正常、s＝慢速）與 manifest.json
 tools/gen-audio.mjs   音檔產生腳本

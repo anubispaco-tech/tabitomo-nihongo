@@ -213,6 +213,42 @@ export function buildReview(state, content) {
   return { level: { id: 'review', title: '今日複習', sub: '' }, levelIdx: -1, steps, pool, mode: 'review' };
 }
 
+// ---------- 單字快閃（看中文＋圖，三選一，選項發音相近；答完看例句） ----------
+export const FLASH_SIZE = 5;
+export const FLASH_SECONDS = 10;
+
+function flashDue(state, deck, date) {
+  return deck.words
+    .filter(w => state.items[w.id] && state.items[w.id].due <= date)
+    .sort((a, b) => state.items[a.id].due.localeCompare(state.items[b.id].due) || state.items[a.id].box - state.items[b.id].box);
+}
+
+// 先複習到期的（最多 3 個），其餘補新字；都不夠時拿學過的隨機補滿
+export function buildFlash(state, deck, date = today()) {
+  const due = flashDue(state, deck, date);
+  const fresh = deck.words.filter(w => !state.items[w.id]);
+  let pickW = [...due.slice(0, 3), ...fresh].slice(0, FLASH_SIZE);
+  if (pickW.length < FLASH_SIZE) pickW = [...pickW, ...due.slice(3)].slice(0, FLASH_SIZE);
+  if (pickW.length < FLASH_SIZE) {
+    const rest = shuffle(deck.words.filter(w => !pickW.includes(w)));
+    pickW = [...pickW, ...rest].slice(0, FLASH_SIZE);
+  }
+  const steps = shuffle(pickW).map((w, n) => ({
+    type: 'flash', n, w,
+    opts: shuffle([{ jp: w.jp, ro: w.ro, zh: w.zh, ok: true }, ...w.alt]),
+    review: !!state.items[w.id],
+  }));
+  return { level: { id: 'flash', title: deck.title, sub: '' }, levelIdx: -1, steps, pool: [], mode: 'flash' };
+}
+
+export function flashCounts(state, deck, date = today()) {
+  return {
+    due: flashDue(state, deck, date).length,
+    fresh: deck.words.filter(w => !state.items[w.id]).length,
+    total: deck.words.length,
+  };
+}
+
 export function reviewLeftToday(state, content) {
   const date = today();
   const done = state.profile.reviewDay === date ? state.profile.reviewCount : 0;

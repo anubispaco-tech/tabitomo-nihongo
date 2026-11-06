@@ -4,7 +4,7 @@ import { plantSVG, PLANTS, plantById } from './plants.js';
 import { MASCOTS, mascotById, mascotImg, mascotLine, homeMood } from './mascot.js';
 import {
   today, newState, applyResult, itemStatus, progressCounts, buildLevel, buildReview, reviewLeftToday,
-  makeQuestion, growthLevel, growthStage, STAGE_LV, CARE, LINES, CHEERS, COMFORT, touchStreak, streakAlive,
+  makeQuestion, buildFlash, flashCounts, FLASH_SECONDS, growthLevel, growthStage, STAGE_LV, CARE, LINES, CHEERS, COMFORT, touchStreak, streakAlive,
 } from './engine.js';
 
 const app = document.getElementById('app');
@@ -13,6 +13,8 @@ let state = null;
 let session = null;
 let travel = null; // 福岡會話題庫（data/travel.json）
 let rp = null;     // 情境模擬進行中的狀態
+let words = null;  // 單字快閃題庫（data/words.json）
+let flashTimer = 0;
 const ui = { tab: 'home', overlay: null, sheet: null, bubble: null, sway: false, toast: null, scene: null, show: null, mood: null, hop: false };
 
 // ---------- 工具 ----------
@@ -85,6 +87,7 @@ async function boot() {
     return;
   }
   try { travel = await (await fetch('data/travel.json', { cache: 'no-cache' })).json(); } catch (e) { travel = null; }
+  try { words = await (await fetch('data/words.json', { cache: 'no-cache' })).json(); } catch (e) { words = null; }
   state = (await loadState()) || newState();
   const base = newState();
   state.settings = { ...base.settings, ...state.settings };
@@ -183,6 +186,7 @@ function viewHome() {
         ? `<button class="btn primary wide" data-action="play" data-i="${nextIdx}">繼續旅程：${esc(content.levels[nextIdx].title)}<small>${esc(content.levels[nextIdx].sub)}</small></button>`
         : `<div class="done-note">序章全部完成！第 1 章「福岡」製作中。</div>`}
       ${dueN ? `<button class="btn review wide" data-action="review">今日複習 <b>${dueN}</b> 題</button>` : ''}
+      ${flashCTA()}
     </section>
     <section class="route">
       <h2>${esc(content.title)}</h2>
@@ -191,6 +195,14 @@ function viewHome() {
           <span class="st-text"><b>第 1 章　福岡</b><small>問路、買車票、搭地鐵（製作中）</small></span></span></li>
       </ol>
     </section>`;
+}
+
+function flashCTA() {
+  if (!words) return '';
+  const c = flashCounts(state, words);
+  const sub = c.due ? `${c.due} 個該複習・${c.fresh} 個新字` : c.fresh ? `還有 ${c.fresh} 個新字` : '全部看過了，再練一輪';
+  return `<button class="btn flash-cta wide" data-action="flash"><span class="fc-emoji" aria-hidden="true">🐈</span>
+    <span class="fc-text"><b>單字快閃・5 題</b><small>${esc(sub)}</small></span><span class="fc-go">GO</span></button>`;
 }
 
 function stampHTML(it, extra = '') {
@@ -361,6 +373,7 @@ function startSession(plan) {
   ui.sheet = null;
   render();
   autoSpeakStep();
+  flashArm();
 }
 
 function curStep() { return session.steps[session.idx]; }
@@ -384,10 +397,15 @@ function viewSession() {
   else if (st.type === 'q') body = viewQuestion(st);
   else if (st.type === 'spell') body = viewSpell(st);
   else if (st.type === 'story') body = viewStory(st);
-  return `<section class="session">
+  else if (st.type === 'flash') body = viewFlash(st);
+  const bar = session.mode === 'flash'
+    ? `<div class="dots" aria-label="第 ${st.n + 1} 題，共 ${session.steps.length} 題">${session.steps.map((x, k) =>
+        `<i class="${k < session.idx || (k === session.idx && session.answered) ? 'on' : k === session.idx ? 'cur' : ''}"></i>`).join('')}</div>`
+    : `<div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>`;
+  return `<section class="session ${session.mode === 'flash' ? 'is-flash' : ''}">
     <header class="session-top">
       <button class="x" data-action="quit" aria-label="離開">×</button>
-      <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+      ${bar}
     </header>
     <div class="step step-${st.type}">${body}</div>
   </section>`;
@@ -506,6 +524,84 @@ function viewStory(st) {
     ${done ? feedback(st.correct, `<p class="explain">${esc(sc.explain)}</p>`, false) : ''}`;
 }
 
+// ---------- 單字快閃 ----------
+// 把 text 裡第一次出現的 hl 包上 <em>（不分大小寫）
+function hlText(text, hl) {
+  const k = hl ? text.toLowerCase().indexOf(hl.toLowerCase()) : -1;
+  if (k < 0) return esc(text);
+  return `${esc(text.slice(0, k))}<em>${esc(text.slice(k, k + hl.length))}</em>${esc(text.slice(k + hl.length))}`;
+}
+
+function rubyHTML(segs) {
+  return segs.map(([t, r, h]) => {
+    const inner = r ? `<ruby>${esc(t)}<rt>${esc(r)}</rt></ruby>` : esc(t);
+    return h ? `<em>${inner}</em>` : inner;
+  }).join('');
+}
+
+function viewFlash(st) {
+  const { w } = st;
+  const done = session.answered;
+  const left = Math.max(0, FLASH_SECONDS - (Date.now() - (st.t0 || Date.now())) / 1000);
+  const opts = st.opts.map((o, i) => {
+    let cls = '';
+    if (done) cls = o.ok ? 'right' : i === st.picked ? 'wrong' : 'dim';
+    return `<button class="fopt ${cls}" data-action="opt" data-i="${i}" ${done ? 'disabled' : ''}>
+      <span class="fnum">${i + 1}</span><span class="fjp jp">${esc(o.jp)}</span><span class="fro ro">${esc(o.ro)}</span></button>`;
+  }).join('');
+  const head = `<p class="f-ask">${st.review ? '<span class="tag soft">複習</span>' : ''}這個用日文怎麼說？</p>
+    <h1 class="f-word">${esc(w.zh)}</h1>
+    <div class="f-timer ${done ? 'full' : ''}"><i style="animation-duration:${FLASH_SECONDS}s;animation-delay:${(left - FLASH_SECONDS).toFixed(2)}s"></i></div>
+    <div class="f-pic ${done ? 'pop' : ''}" aria-hidden="true">${w.emoji}</div>`;
+  if (!done) return `${head}<div class="fopts">${opts}</div>`;
+
+  const e = w.ex;
+  const others = st.opts.map((o, i) => (o.ok ? '' :
+    `<button class="f-other ${i === st.picked ? 'picked' : ''}" data-action="say" data-text="${esc(o.jp)}">${i === st.picked ? '你選的・' : ''}<span class="jp">${esc(o.jp)}</span> ${esc(o.zh)}</button>`)).join('');
+  return `${head}
+    <div class="f-verdict ${st.correct ? 'ok' : 'ng'}">${st.timeout ? '時間到！答案是' : st.correct ? '答對了！' : '差一點，答案是'}
+      <button class="f-ans" data-action="say" data-text="${esc(w.jp)}"><i class="ic ic-sound inline"></i><span class="jp">${esc(w.jp)}</span> ${ro(w.ro)}</button></div>
+    <button class="f-sentence" data-action="say" data-text="${esc(e.jp)}" aria-label="播放例句">
+      <span class="f-jp jp">${rubyHTML(e.s)}</span>
+      <span class="f-line"></span>
+      <span class="f-ro ro">${hlText(e.ro, e.roHl)}</span>
+      <span class="f-zh">${hlText(e.zh, e.zhHl)}</span>
+    </button>
+    <div class="f-others">${others}</div>
+    ${w.note ? `<p class="f-note">${esc(w.note)}</p>` : ''}
+    <div class="foot"><button class="btn primary wide" data-action="next">${session.idx + 1 >= session.steps.length ? '看結果' : '下一個'}</button></div>`;
+}
+
+function flashArm() {
+  clearTimeout(flashTimer);
+  const st = session && ui.overlay === 'session' ? curStep() : null;
+  if (!st || st.type !== 'flash' || session.answered) return;
+  st.t0 ||= Date.now();
+  const ms = FLASH_SECONDS * 1000 - (Date.now() - st.t0);
+  flashTimer = setTimeout(() => {
+    if (session && curStep() === st && !session.answered) answerFlash(-1);
+  }, Math.max(0, ms));
+}
+
+function answerFlash(i) {
+  const st = curStep();
+  if (session.answered) return;
+  clearTimeout(flashTimer);
+  const ok = i >= 0 && !!st.opts[i].ok;
+  st.picked = i;
+  st.correct = ok;
+  st.timeout = i < 0;
+  session.answered = true;
+  const s = session.stats[st.w.id] || (session.stats[st.w.id] = { wrong: false, hint: false });
+  if (!ok) s.wrong = true;
+  session.total++;
+  if (ok) session.right++;
+  record(st.w.id, st.timeout ? 'flash-timeout' : 'flash', ok);
+  ok ? sfx.correct() : sfx.wrong();
+  render();
+  if (state.settings.autoplay) say(st.w.ex.jp);
+}
+
 function record(itemId, kind, ok, extra = {}) {
   session.logs.push({ item: itemId, kind, ok, ms: Math.round(performance.now() - session.t0), ts: Date.now(), level: session.level.id, ...extra });
 }
@@ -580,9 +676,11 @@ function nextStep() {
   session.idx++;
   session.answered = false;
   session.t0 = performance.now();
+  clearTimeout(flashTimer);
   if (session.idx >= session.steps.length) { finishSession(); return; }
   render();
   autoSpeakStep();
+  flashArm();
 }
 
 function finishSession() {
@@ -596,7 +694,7 @@ function finishSession() {
   });
 
   const acc = session.total ? Math.round((session.right / session.total) * 100) : 100;
-  let coins = session.right * (session.mode === 'review' ? 3 : 5);
+  let coins = session.right * (session.mode === 'level' ? 5 : 3);
   let exp = 0;
   if (session.mode === 'level') {
     const rec = state.levels[session.level.id] || { done: false, plays: 0, best: 0 };
@@ -604,6 +702,8 @@ function finishSession() {
     coins += firstClear ? 20 : 10;
     exp += firstClear ? 30 : 10;
     state.levels[session.level.id] = { done: true, plays: rec.plays + 1, best: Math.max(rec.best, acc) };
+  } else if (session.mode === 'flash') {
+    exp += 8;
   } else {
     exp += 10;
     if (state.profile.reviewDay !== date) { state.profile.reviewDay = date; state.profile.reviewCount = 0; }
@@ -637,7 +737,7 @@ function viewResult() {
   const newStamps = r.newly.map(byId).filter(Boolean);
   const m = mascot();
   return `<section class="result">
-    <h1>${isLevel ? `「${esc(session.level.title)}」完成！` : '今日複習完成！'}</h1>
+    <h1>${isLevel ? `「${esc(session.level.title)}」完成！` : session.mode === 'flash' ? `單字快閃 ${session.right}/${session.total}` : '今日複習完成！'}</h1>
     <div class="result-duo"><div class="plant-hero grow">${drawPlant(ci)}</div>
       ${m ? `<button class="mascot-btn" data-action="mascot-say" data-mood="${r.mood}">${mascotHTML(r.mood, 'pop')}</button>` : ''}</div>
     ${m && r.line ? `<div class="bubble">${line(r.line)}</div>` : ''}
@@ -654,7 +754,8 @@ function viewResult() {
       `<span class="stamp-in" style="animation-delay:${0.25 + i * 0.18}s">${stampHTML(it)}</span>`).join('')}</div>` : ''}
     <div class="foot col">
       ${hasNext ? `<button class="btn primary wide" data-action="play" data-i="${nextIdx}">下一站：${esc(content.levels[nextIdx].title)}</button>` : ''}
-      <button class="btn ${hasNext ? 'ghost' : 'primary'} wide" data-action="home">回到旅程</button>
+      ${session.mode === 'flash' ? '<button class="btn primary wide" data-action="flash">再來 5 題</button>' : ''}
+      <button class="btn ${hasNext || session.mode === 'flash' ? 'ghost' : 'primary'} wide" data-action="home">回到旅程</button>
     </div>
   </section>`;
 }
@@ -922,16 +1023,19 @@ app.addEventListener('click', e => {
     case 'onboard-go': state.onboarded = true; save(); startSession(buildLevel(state, content, 0)); break;
     case 'play': startSession(buildLevel(state, content, i)); break;
     case 'review': startSession(buildReview(state, content)); break;
+    case 'flash': if (words) startSession(buildFlash(state, words)); break;
     case 'locked': toast('先完成前一站才能前往'); break;
-    case 'home': session = null; ui.overlay = null; ui.tab = 'home'; ui.bubble = null; ui.mood = null; render(); window.scrollTo(0, 0); break;
+    case 'home': clearTimeout(flashTimer); session = null; ui.overlay = null; ui.tab = 'home'; ui.bubble = null; ui.mood = null; render(); window.scrollTo(0, 0); break;
     case 'quit':
+      clearTimeout(flashTimer);
       if (confirm('現在離開，這一關的進度不會保存。確定離開嗎？')) { window.speechSynthesis?.cancel(); session = null; ui.overlay = null; render(); }
+      else flashArm();
       break;
     case 'next': nextStep(); break;
     case 'say': say(el.dataset.text); break;
     case 'say-slow': say(el.dataset.text, { slow: true }); break;
     case 'say-spell': speech.spell(el.dataset.text, { slow: state.settings.slow }); break;
-    case 'opt': curStep().type === 'story' ? answerStory(i) : answerQuestion(i); break;
+    case 'opt': { const t = curStep().type; t === 'story' ? answerStory(i) : t === 'flash' ? answerFlash(i) : answerQuestion(i); break; }
     case 'hint': {
       const st = curStep();
       st.hint = true;
@@ -989,9 +1093,10 @@ document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && (session.answered || ['banner', 'intro'].includes(curStep().type)) && !e.target.closest('button')) {
     e.preventDefault();
     nextStep();
-  } else if (/^[1-4]$/.test(e.key) && !session.answered && ['q', 'story'].includes(curStep().type)) {
+  } else if (/^[1-4]$/.test(e.key) && !session.answered && ['q', 'story', 'flash'].includes(curStep().type)) {
     const k = Number(e.key) - 1;
     const st = curStep();
+    if (st.type === 'flash') { if (k < st.opts.length) answerFlash(k); return; }
     const n = st.type === 'story' ? st.scene.choices.length : st.q.options.length;
     if (k < n) st.type === 'story' ? answerStory(k) : answerQuestion(k);
   }
